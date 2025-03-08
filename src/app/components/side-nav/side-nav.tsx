@@ -9,7 +9,7 @@ import {
   IconSwitchHorizontal,
   IconLogout,
 } from '@tabler/icons-react';
-import classes from './side-nav.module.css';
+import classes from './side-nav.module.scss';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 

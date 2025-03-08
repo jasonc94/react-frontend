@@ -1,0 +1,6 @@
+/* You can add global styles to this file, and also import other style files */
+@use 'sass:math'; // Import the math module
+
+@function to-rem($px) {
+  @return math.div($px, 16px) * 1rem; // Directly return the value in rem
+}

@@ -1,9 +1,9 @@
-import styles from './home.module.css';
+import styles from './home.module.scss';
 
 export function Home() {
   return (
     <div className={styles['container']}>
-      <h1>Welcome to Home!</h1>
+      <h1>Welcome to Home! test</h1>
     </div>
   );
 }
