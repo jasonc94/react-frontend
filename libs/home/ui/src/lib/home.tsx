@@ -1,11 +1,8 @@
 import styles from './home.module.scss';
+import ProfessionalExperience from './professional-experience/professional-experience';
 
 export function Home() {
-  return (
-    <div className={styles['container']}>
-      <h1>Welcome to Home! test</h1>
-    </div>
-  );
+  return <ProfessionalExperience />;
 }
 
 export default Home;
