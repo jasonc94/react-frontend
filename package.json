@@ -12,8 +12,26 @@
     "includedScripts": []
   },
   "dependencies": {
+    "@mantine/charts": "^7.17.1",
+    "@mantine/code-highlight": "^7.17.1",
+    "@mantine/core": "^7.17.1",
+    "@mantine/dates": "^7.17.1",
+    "@mantine/dropzone": "^7.17.1",
+    "@mantine/form": "^7.17.1",
+    "@mantine/hooks": "^7.17.1",
+    "@mantine/modals": "^7.17.1",
+    "@mantine/notifications": "^7.17.1",
+    "@mantine/nprogress": "^7.17.1",
+    "@mantine/spotlight": "^7.17.1",
+    "@mantine/tiptap": "^7.17.1",
+    "@tiptap/extension-link": "^2.11.5",
+    "@tiptap/pm": "^2.11.5",
+    "@tiptap/react": "^2.11.5",
+    "@tiptap/starter-kit": "^2.11.5",
+    "dayjs": "^1.11.13",
     "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "react-dom": "19.0.0",
+    "recharts": "^2.15.1"
   },
   "devDependencies": {
     "@babel/core": "^7.14.5",
