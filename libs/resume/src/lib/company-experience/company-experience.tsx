@@ -11,9 +11,20 @@ import {
 } from '@mantine/core';
 import { IconHeart } from '@tabler/icons-react';
 
-export function CompanyExperience({ company }: { company: Company }) {
+export function CompanyExperience({
+  company,
+  className,
+}: {
+  company: Company;
+  className?: string;
+}) {
   return (
-    <Card withBorder radius="md" p="md" className={classes.card}>
+    <Card
+      withBorder
+      radius="md"
+      p="md"
+      className={`${classes.card} ${className}`}
+    >
       <Card.Section>
         <Image src={company.logoUrl} alt={company.name} height={180} />
       </Card.Section>
