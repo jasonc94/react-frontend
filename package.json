@@ -24,6 +24,7 @@
     "@mantine/nprogress": "^7.17.1",
     "@mantine/spotlight": "^7.17.1",
     "@mantine/tiptap": "^7.17.1",
+    "@tabler/icons-react": "^3.31.0",
     "@tiptap/extension-link": "^2.11.5",
     "@tiptap/pm": "^2.11.5",
     "@tiptap/react": "^2.11.5",
@@ -31,6 +32,7 @@
     "dayjs": "^1.11.13",
     "react": "19.0.0",
     "react-dom": "19.0.0",
+    "react-router-dom": "^7.3.0",
     "recharts": "^2.15.1"
   },
   "devDependencies": {
