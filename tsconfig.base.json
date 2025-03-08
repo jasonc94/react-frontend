@@ -16,7 +16,8 @@
     "baseUrl": ".",
     "paths": {
       "@JC/home": ["libs/home/ui/src/index.ts"],
-      "@JC/models": ["libs/models/src/index.ts"]
+      "@JC/models": ["libs/models/src/index.ts"],
+      "@JC/resume": ["libs/resume/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
