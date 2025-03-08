@@ -40,15 +40,15 @@
     "@nx/react": {
       "application": {
         "babel": true,
-        "style": "css",
+        "style": "scss",
         "linter": "eslint",
         "bundler": "vite"
       },
       "component": {
-        "style": "css"
+        "style": "scss"
       },
       "library": {
-        "style": "css",
+        "style": "scss",
         "linter": "eslint",
         "unitTestRunner": "none"
       }
