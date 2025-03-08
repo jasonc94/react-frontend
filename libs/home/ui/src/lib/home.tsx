@@ -1,8 +1,8 @@
+import { ProfessionalExperiences } from '@JC/resume';
 import styles from './home.module.scss';
-import ProfessionalExperience from './professional-experience/professional-experience';
 
 export function Home() {
-  return <ProfessionalExperience />;
+  return <ProfessionalExperiences />;
 }
 
 export default Home;

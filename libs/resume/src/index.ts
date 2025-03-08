@@ -1,1 +1,1 @@
-export * from './lib/resume';
+export * from './lib/professional-experiences/professional-experiences';
