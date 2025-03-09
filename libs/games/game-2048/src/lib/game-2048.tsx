@@ -1,9 +1,14 @@
 import { useEffect, useState } from 'react';
 import styles from './game-2048.module.scss';
-import { initializeBoard, move } from './services/game-2048-service';
+import {
+  initializeBoard,
+  isGameOver,
+  move,
+} from './services/game-2048-service';
 
 export function Game2048() {
   const [board, setBoard] = useState(initializeBoard());
+  const [gameOver, setGameOver] = useState(false);
 
   useEffect(() => {
     const onArrowKey = (e: KeyboardEvent) => {
@@ -18,6 +23,7 @@ export function Game2048() {
       if (directionMap[e.key]) {
         const newBoard = move(board, directionMap[e.key]);
         setBoard(newBoard);
+        setGameOver(isGameOver(newBoard));
       }
     };
 
@@ -39,6 +45,9 @@ export function Game2048() {
             </div>
           ))
         )}
+      </div>
+      <div>
+        {!gameOver && <div className={styles.gameOver}>Game Over!</div>}
       </div>
     </div>
   );

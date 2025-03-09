@@ -56,3 +56,9 @@ $tile-colors: (
     }
   }
 }
+
+.gameOver {
+  background: rgba(0, 0, 0, 0.5);
+  color: red;
+  font-size: 30px;
+}
