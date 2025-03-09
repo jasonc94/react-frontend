@@ -1,9 +1,29 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './game-2048.module.scss';
-import { initializeBoard } from './services/game-2048-service';
+import { initializeBoard, move } from './services/game-2048-service';
 
 export function Game2048() {
   const [board, setBoard] = useState(initializeBoard());
+
+  useEffect(() => {
+    const onArrowKey = (e: KeyboardEvent) => {
+      const directionMap: { [key: string]: 'left' | 'right' | 'up' | 'down' } =
+        {
+          ArrowLeft: 'left',
+          ArrowRight: 'right',
+          ArrowUp: 'up',
+          ArrowDown: 'down',
+        };
+
+      if (directionMap[e.key]) {
+        const newBoard = move(board, directionMap[e.key]);
+        setBoard(newBoard);
+      }
+    };
+
+    window.addEventListener('keydown', onArrowKey);
+    return () => window.removeEventListener('keydown', onArrowKey);
+  }, [board]);
 
   return (
     <div className={styles.gameContainer}>
