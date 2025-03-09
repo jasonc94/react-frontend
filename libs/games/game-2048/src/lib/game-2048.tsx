@@ -6,14 +6,14 @@ export function Game2048() {
   const [board, setBoard] = useState(initializeBoard());
 
   return (
-    <div className="game-container">
+    <div className={styles.gameContainer}>
       <h1>2048 Game</h1>
-      <div className="board">
+      <div className={styles.board}>
         {board.map((row, rowIndex) =>
           row.map((cell, colIndex) => (
             <div
               key={`${rowIndex}-${colIndex}`}
-              className={`tile tile-${cell}`}
+              className={`${styles.tile} ${styles[`tile-${cell}`]}`}
             >
               {cell !== 0 ? cell : ''}
             </div>
