@@ -28,7 +28,8 @@ export function addTile(board: number[][]) {
 
 export function move(
   board: number[][],
-  direction: 'up' | 'down' | 'left' | 'right'
+  direction: 'up' | 'down' | 'left' | 'right',
+  setScore: (value: React.SetStateAction<number>) => void
 ) {
   let newBoard = board.map((row) => [...row]);
 
@@ -40,6 +41,7 @@ export function move(
       if (row[i] === row[i + 1]) {
         row[i] *= 2;
         row[i + 1] = 0;
+        setScore((prevScore) => prevScore + row[i]);
       }
     }
     // remove new 0s from and fill 0s to maintin length of 4

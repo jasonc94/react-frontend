@@ -5,9 +5,11 @@ import {
   isGameOver,
   move,
 } from './services/game-2048-service';
+import { Title, Text, Button, Flex } from '@mantine/core';
 
 export function Game2048() {
   const [board, setBoard] = useState(initializeBoard());
+  const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
 
   useEffect(() => {
@@ -21,7 +23,7 @@ export function Game2048() {
         };
 
       if (directionMap[e.key]) {
-        const newBoard = move(board, directionMap[e.key]);
+        const newBoard = move(board, directionMap[e.key], setScore);
         setBoard(newBoard);
         setGameOver(isGameOver(newBoard));
       }
@@ -31,9 +33,20 @@ export function Game2048() {
     return () => window.removeEventListener('keydown', onArrowKey);
   }, [board]);
 
+  const restartGame = () => {
+    setBoard(initializeBoard());
+    setScore(0);
+    setGameOver(false);
+  };
+
   return (
     <div className={styles.gameContainer}>
-      <h1>2048 Game</h1>
+      <Title order={1} c={'blue'}>
+        2048 Game
+      </Title>
+      <Text tt={'uppercase'} c="blue" ta={'center'}>
+        Score: {score}
+      </Text>
       <div className={styles.board}>
         {board.map((row, rowIndex) =>
           row.map((cell, colIndex) => (
@@ -46,9 +59,18 @@ export function Game2048() {
           ))
         )}
       </div>
-      <div>
-        {!gameOver && <div className={styles.gameOver}>Game Over!</div>}
-      </div>
+      <Flex justify="center" align="center">
+        <div>
+          {!gameOver && (
+            <Text c={'red'} fw={700} fs={'5rem'} tt={'uppercase'} ta={'center'}>
+              Game Over!
+            </Text>
+          )}
+        </div>
+        <Button variant="filled" onClick={restartGame}>
+          Restart
+        </Button>
+      </Flex>
     </div>
   );
 }
