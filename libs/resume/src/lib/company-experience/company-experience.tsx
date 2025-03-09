@@ -26,7 +26,7 @@ export function CompanyExperience({
       className={`${classes.card} ${className}`}
     >
       <Card.Section>
-        <Image src={company.logoUrl} alt={company.name} height={180} />
+        <Image src={company.logoUrl} alt={company.name} height={180} w="100%" />
       </Card.Section>
 
       <Card.Section className={classes.section} mt="md">
