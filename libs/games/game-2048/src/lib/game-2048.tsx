@@ -11,24 +11,22 @@ export function Game2048() {
   const [board, setBoard] = useState(initializeBoard());
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
-
-  useEffect(() => {
-    const onArrowKey = (e: KeyboardEvent) => {
-      const directionMap: { [key: string]: 'left' | 'right' | 'up' | 'down' } =
-        {
-          ArrowLeft: 'left',
-          ArrowRight: 'right',
-          ArrowUp: 'up',
-          ArrowDown: 'down',
-        };
-
-      if (directionMap[e.key]) {
-        const newBoard = move(board, directionMap[e.key], setScore);
-        setBoard(newBoard);
-        setGameOver(isGameOver(newBoard));
-      }
+  const onArrowKey = (e: KeyboardEvent) => {
+    const directionMap: { [key: string]: 'left' | 'right' | 'up' | 'down' } = {
+      ArrowLeft: 'left',
+      ArrowRight: 'right',
+      ArrowUp: 'up',
+      ArrowDown: 'down',
     };
 
+    if (directionMap[e.key]) {
+      const newBoard = move(board, directionMap[e.key], setScore);
+      setBoard(newBoard);
+      setGameOver(isGameOver(newBoard));
+    }
+  };
+
+  useEffect(() => {
     window.addEventListener('keydown', onArrowKey);
     return () => window.removeEventListener('keydown', onArrowKey);
   }, [board]);
