@@ -3,7 +3,7 @@ import { ACCESS_TOKEN } from '../constants';
 import { useContext } from 'react';
 import { EnvironmentContext } from '@JC/shared/context';
 
-const useApi = (addAuthHeader = true) => {
+export const useApi = (addAuthHeader = true) => {
   const env = useContext(EnvironmentContext);
   const api = axios.create({
     baseURL: env?.apiUrl,

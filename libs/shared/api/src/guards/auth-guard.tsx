@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { ACCESS_TOKEN, REFRESH_TOKEN } from '../constants';
 import { jwtDecode } from 'jwt-decode';
-import useApi from '../interceptors/auth-interceptor';
+import { useApi } from '../interceptors/auth-interceptor';
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<null | boolean>(null);
