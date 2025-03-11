@@ -1,16 +1,16 @@
 export interface Company {
   name: string;
-  startDate: Date;
-  endDate: Date | null;
+  startDate: string;
+  endDate: string | null;
   description: string;
-  logoUrl?: string;
+  logo?: string;
   projects?: Project[];
 }
 
 export interface Project {
   name: string;
-  startDate: Date;
-  endDate: Date | null;
+  startDate: string;
+  endDate: string | null;
   description: string;
   technologies: string[];
 }

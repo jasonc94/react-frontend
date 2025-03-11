@@ -10,6 +10,8 @@ import {
   Text,
 } from '@mantine/core';
 import { IconHeart } from '@tabler/icons-react';
+import dayjs from 'dayjs';
+import DOMPurify from 'dompurify';
 
 export function CompanyExperience({
   company,
@@ -26,21 +28,37 @@ export function CompanyExperience({
       className={`${classes.card} ${className}`}
     >
       <Card.Section>
-        <Image src={company.logoUrl} alt={company.name} height={180} w="100%" />
+        <Image
+          src={company.logo}
+          alt={company.name}
+          height={180}
+          w="60%"
+          fit="contain"
+        />
       </Card.Section>
 
       <Card.Section className={classes.section} mt="md">
         <Group justify="apart">
-          <Text fz="lg" fw={500}>
+          <Text fz="lg" fw={500} c={'blue'}>
             {company.name}
           </Text>
           <Badge size="sm" variant="light">
-            {company.startDate.getFullYear()}
+            {dayjs(company.startDate).format('MM/YYYY')} -{' '}
+            {company.endDate
+              ? dayjs(company.endDate).format('MM/YYYY')
+              : 'Present'}
           </Badge>
         </Group>
-        <Text fz="sm" mt="xs">
+        <div>
+          <div
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(company.description),
+            }}
+          />
+        </div>
+        {/* <Text fz="sm" mt="xs">
           {company.description}
-        </Text>
+        </Text> */}
       </Card.Section>
 
       <Card.Section className={classes.section}>
