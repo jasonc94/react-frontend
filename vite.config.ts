@@ -3,9 +3,13 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
+import packageJson from './package.json';
 
 export default defineConfig(() => ({
   root: __dirname,
+  define: {
+    'import.meta.env.VITE_APP_VERSION': JSON.stringify(packageJson.version),
+  },
   cacheDir: './node_modules/.vite/react-web-app',
   server: {
     port: 4200,

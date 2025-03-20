@@ -42,7 +42,7 @@ export function AppMainShell() {
               offLabel="Light"
               onChange={toggleColorScheme}
             />
-            <Code fw={700}>v3.1.2</Code>
+            <Code fw={700}>v{import.meta.env.VITE_APP_VERSION}</Code>
           </Group>
         </Group>
       </AppShell.Header>
