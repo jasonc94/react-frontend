@@ -20,7 +20,8 @@
       "@JC/models": ["libs/models/src/index.ts"],
       "@JC/resume": ["libs/resume/src/index.ts"],
       "@JC/shared/api": ["libs/shared/api/src/index.ts"],
-      "@JC/shared/context": ["libs/shared/context/src/index.ts"]
+      "@JC/shared/context": ["libs/shared/context/src/index.ts"],
+      "@JC/webrtc/ui": ["libs/webrtc/ui/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
