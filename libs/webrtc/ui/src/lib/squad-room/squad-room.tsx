@@ -10,6 +10,7 @@ export function SquadRoom() {
 
   const ws = useRef<WebSocket | null>(null);
 
+  // Local Video Feed
   useEffect(() => {
     const initLocalStream = async () => {
       try {
@@ -26,20 +27,6 @@ export function SquadRoom() {
       }
     };
 
-    ws.current = new WebSocket('ws://localhost:8000/ws/testing-room/');
-
-    ws.current.onopen = () => {
-      console.log('WebSocket connection opened');
-    };
-
-    ws.current.onmessage = (event) => {
-      console.log('WebSocket message received:', event.data);
-    };
-
-    ws.current.onclose = () => {
-      console.log('WebSocket connection closed');
-    };
-
     initLocalStream();
 
     // Cleanup
@@ -53,6 +40,64 @@ export function SquadRoom() {
     };
   }, []);
 
+  // Peer Connection
+  useEffect(() => {
+    if (!peerConnection) {
+      createPeerConnection();
+    }
+  }, []);
+
+  const startWsConnection = () => {
+    ws.current = new WebSocket('ws://localhost:8000/ws/testing-room/');
+
+    ws.current.onopen = () => {
+      console.log('WebSocket connection opened');
+    };
+
+    ws.current.onmessage = async (event) => {
+      const data = JSON.parse(event.data);
+      const type = data.type;
+      switch (type) {
+        case 'offer':
+          if (!peerConnection) {
+            createPeerConnection();
+          }
+          if (peerConnection) {
+            await peerConnection.setRemoteDescription(
+              new RTCSessionDescription(data.payload)
+            );
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+            ws?.current?.send(
+              JSON.stringify({ type: 'answer', payload: answer })
+            );
+          }
+          break;
+        case 'answer':
+          if (peerConnection) {
+            await peerConnection.setRemoteDescription(
+              new RTCSessionDescription(data.payload)
+            );
+          }
+          break;
+        case 'icecandidate':
+          if (peerConnection) {
+            try {
+              await peerConnection.addIceCandidate(data.payload);
+            } catch (e) {
+              console.error('error adding ice candidate', e);
+            }
+          }
+          break;
+      }
+      console.log('WebSocket message received:', event.data);
+    };
+
+    ws.current.onclose = () => {
+      console.log('WebSocket connection closed');
+    };
+  };
+
   const createPeerConnection = () => {
     const pc = new RTCPeerConnection({
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
@@ -61,7 +106,7 @@ export function SquadRoom() {
     pc.onicecandidate = (event) => {
       if (event.candidate) {
         ws.current?.send(
-          JSON.stringify({ type: 'candidate', candidate: event.candidate })
+          JSON.stringify({ type: 'icecandidate', payload: event.candidate })
         );
       }
     };
@@ -79,21 +124,23 @@ export function SquadRoom() {
     }
 
     setPeerConnection(pc);
+    console.log('Peer connection created');
   };
 
   const joinSquadRoom = async () => {
     if (!peerConnection) {
-      createPeerConnection();
+      return;
     }
+
+    startWsConnection();
 
     try {
       const offer = await peerConnection?.createOffer();
-      if (!offer) return;
       await peerConnection?.setLocalDescription(offer);
 
-      ws?.current?.send(JSON.stringify(offer));
+      ws?.current?.send(JSON.stringify({ type: 'offer', payload: offer }));
 
-      console.log('Offer:', offer);
+      console.log('Offer sent successfully');
     } catch (error) {
       console.error('Error creating offer:', error);
     }
