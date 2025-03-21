@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from './squad-room.module.scss';
+import WebsocketService from '../services/websocket-service';
 
 export function SquadRoom() {
   const localVideo = useRef<HTMLVideoElement | null>(null);
@@ -8,7 +9,15 @@ export function SquadRoom() {
   const [peerConnection, setPeerConnection] =
     useState<RTCPeerConnection | null>(null);
 
-  const ws = useRef<WebSocket | null>(null);
+  const wsService = useRef<WebsocketService | null>(null);
+
+  if (wsService.current === null) {
+    wsService.current = new WebsocketService(
+      'ws://localhost:8000/ws/testing-room/'
+    );
+  }
+
+  // const ws = useRef<WebSocket | null>(null);
 
   // Local Video Feed
   useEffect(() => {
@@ -34,16 +43,18 @@ export function SquadRoom() {
       if (localStream) {
         localStream.getTracks().forEach((track) => track.stop());
       }
-      if (ws.current) {
-        ws.current.close();
-      }
+      wsService.current?.disconnect();
     };
   }, []);
 
   // Peer Connection
   useEffect(() => {
     if (peerConnection && localStream) {
-      startWsConnection();
+      wsService.current?.onOpen(createOffer);
+      wsService.current?.on('offer', createAnswer);
+      wsService.current?.on('answer', handleAnswer);
+      wsService.current?.on('icecandidate', handleIceCandidate);
+      wsService.current?.connect();
     }
   }, [peerConnection, localStream]);
 
@@ -100,9 +111,10 @@ export function SquadRoom() {
     pc.onicecandidate = (event) => {
       console.log('New ICE candidateReceived');
       if (event.candidate) {
-        ws.current?.send(
-          JSON.stringify({ type: 'icecandidate', payload: event.candidate })
-        );
+        wsService.current?.send({
+          type: 'icecandidate',
+          payload: event.candidate,
+        });
       }
     };
 
@@ -126,7 +138,7 @@ export function SquadRoom() {
     try {
       const offer = await peerConnection?.createOffer();
       await peerConnection?.setLocalDescription(offer);
-      ws?.current?.send(JSON.stringify({ type: 'offer', payload: offer }));
+      wsService?.current?.send({ type: 'offer', payload: offer });
       console.log('Offer created');
     } catch (error) {
       console.error('Error creating offer:', error);
@@ -140,7 +152,7 @@ export function SquadRoom() {
       );
       const answer = await peerConnection?.createAnswer();
       await peerConnection?.setLocalDescription(answer);
-      ws?.current?.send(JSON.stringify({ type: 'answer', payload: answer }));
+      wsService?.current?.send({ type: 'answer', payload: answer });
       console.log('Answer created');
     } catch (error) {
       console.error('Error creating answer:', error);

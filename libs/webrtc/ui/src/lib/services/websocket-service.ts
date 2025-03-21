@@ -1,0 +1,72 @@
+type WebsocketMessage = {
+  type: string;
+  payload: unknown;
+};
+
+type WebsocketCallback = {
+  [key: string]: (payload: any) => void;
+};
+
+type WebSocketEventCallbacks = {
+  onOpen?: () => void;
+  onClose?: () => void;
+};
+
+class WebsocketService {
+  private url: string;
+  private ws: WebSocket | null = null;
+  private callbacks: WebsocketCallback = {};
+  private eventCallbacks: WebSocketEventCallbacks = {};
+  constructor(url: string) {
+    this.url = url;
+  }
+
+  connect() {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      return;
+    }
+
+    this.ws = new WebSocket(this.url);
+    this.ws.onopen = () => {
+      console.log('WebSocket connection opened');
+      this.eventCallbacks.onOpen?.();
+    };
+
+    this.ws.onmessage = (event) => {
+      const data: WebsocketMessage = JSON.parse(event.data);
+      const type = data.type;
+      console.log('WebSocket message received:', type);
+      this.callbacks[type]?.(data.payload);
+    };
+
+    this.ws.onclose = () => {
+      console.log('WebSocket connection closed');
+      this.eventCallbacks.onClose?.();
+    };
+  }
+
+  on(type: string, callBack: (payload: any) => void) {
+    this.callbacks[type] = callBack;
+  }
+
+  onOpen(callBack: () => void) {
+    this.eventCallbacks.onOpen = callBack;
+  }
+
+  onClose(callBack: () => void) {
+    this.eventCallbacks.onClose = callBack;
+  }
+
+  send(message: WebsocketMessage) {
+    if (this.ws?.readyState !== WebSocket.OPEN) {
+      console.error('WebSocket is not open');
+    }
+    this.ws?.send(JSON.stringify(message));
+  }
+
+  disconnect() {
+    this.ws?.close();
+  }
+}
+
+export default WebsocketService;
