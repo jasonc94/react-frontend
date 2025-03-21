@@ -1,7 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from './squad-room.module.scss';
 import WebsocketService from '../services/websocket-service';
-import { Button, Card, Group, Stack, Title } from '@mantine/core';
+import {
+  ActionIcon,
+  Button,
+  Card,
+  Group,
+  Stack,
+  Title,
+  Tooltip,
+} from '@mantine/core';
 import {
   IconMicrophone,
   IconMicrophoneOff,
@@ -198,28 +206,40 @@ export function SquadRoom() {
             Local Video
           </Title>
           <Group mt="md" justify="center">
-            <Button
-              leftSection={
-                isVideoOn ? <IconVideo size={16} /> : <IconVideoOff size={16} />
-              }
-              color={isVideoOn ? 'green' : 'red'}
-              onClick={() => toggleVideoOrAudio('video')}
+            <Tooltip
+              label={isVideoOn ? 'Turn Off Video' : 'Turn On Video'}
+              withArrow
             >
-              {isVideoOn ? 'Turn Off Video' : 'Turn On Video'}
-            </Button>
-            <Button
-              leftSection={
-                isAudioOn ? (
-                  <IconMicrophone size={16} />
+              <ActionIcon
+                size="xl"
+                radius="xl"
+                variant="filled"
+                color={isVideoOn ? undefined : 'red'}
+                onClick={() => toggleVideoOrAudio('video')}
+              >
+                {isVideoOn ? (
+                  <IconVideo size={24} />
                 ) : (
-                  <IconMicrophoneOff size={16} />
-                )
-              }
-              color={isAudioOn ? 'green' : 'red'}
-              onClick={() => toggleVideoOrAudio('audio')}
-            >
-              {isAudioOn ? 'Mute' : 'Unmute'}
-            </Button>
+                  <IconVideoOff size={24} />
+                )}
+              </ActionIcon>
+            </Tooltip>
+
+            <Tooltip label={isAudioOn ? 'Mute' : 'Unmute'} withArrow>
+              <ActionIcon
+                size="xl"
+                radius="xl"
+                variant="filled"
+                color={isAudioOn ? undefined : 'red'}
+                onClick={() => toggleVideoOrAudio('audio')}
+              >
+                {isAudioOn ? (
+                  <IconMicrophone size={24} />
+                ) : (
+                  <IconMicrophoneOff size={24} />
+                )}
+              </ActionIcon>
+            </Tooltip>
           </Group>
         </Card>
 
