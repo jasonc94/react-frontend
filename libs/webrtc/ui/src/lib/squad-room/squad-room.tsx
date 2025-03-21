@@ -8,6 +8,8 @@ export function SquadRoom() {
   const [peerConnection, setPeerConnection] =
     useState<RTCPeerConnection | null>(null);
 
+  const ws = useRef<WebSocket | null>(null);
+
   useEffect(() => {
     const initLocalStream = async () => {
       try {
@@ -24,12 +26,29 @@ export function SquadRoom() {
       }
     };
 
+    ws.current = new WebSocket('ws://localhost:8000/ws/testing-room/');
+
+    ws.current.onopen = () => {
+      console.log('WebSocket connection opened');
+    };
+
+    ws.current.onmessage = (event) => {
+      console.log('WebSocket message received:', event.data);
+    };
+
+    ws.current.onclose = () => {
+      console.log('WebSocket connection closed');
+    };
+
     initLocalStream();
 
     // Cleanup
     return () => {
       if (localStream) {
         localStream.getTracks().forEach((track) => track.stop());
+      }
+      if (ws.current) {
+        ws.current.close();
       }
     };
   }, []);
@@ -41,7 +60,9 @@ export function SquadRoom() {
 
     pc.onicecandidate = (event) => {
       if (event.candidate) {
-        console.log('ICE Candidate:', event.candidate);
+        ws.current?.send(
+          JSON.stringify({ type: 'candidate', candidate: event.candidate })
+        );
       }
     };
 
@@ -67,7 +88,10 @@ export function SquadRoom() {
 
     try {
       const offer = await peerConnection?.createOffer();
+      if (!offer) return;
       await peerConnection?.setLocalDescription(offer);
+
+      ws?.current?.send(JSON.stringify(offer));
 
       console.log('Offer:', offer);
     } catch (error) {
