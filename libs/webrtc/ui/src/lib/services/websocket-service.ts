@@ -66,6 +66,7 @@ class WebsocketService {
 
   disconnect() {
     this.ws?.close();
+    this.ws = null;
   }
 }
 
