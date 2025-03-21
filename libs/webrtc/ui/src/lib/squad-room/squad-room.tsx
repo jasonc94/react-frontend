@@ -2,6 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import styles from './squad-room.module.scss';
 import WebsocketService from '../services/websocket-service';
 import { Button, Card, Group, Stack, Title } from '@mantine/core';
+import {
+  IconMicrophone,
+  IconMicrophoneOff,
+  IconVideo,
+  IconVideoOff,
+} from '@tabler/icons-react';
 
 export function SquadRoom() {
   const localVideo = useRef<HTMLVideoElement | null>(null);
@@ -9,6 +15,9 @@ export function SquadRoom() {
   const wsService = useRef<WebsocketService | null>(null);
   const localStream = useRef<MediaStream>(null);
   const peerConnection = useRef<RTCPeerConnection | null>(null);
+
+  const [isVideoOn, setIsVideoOn] = useState(true);
+  const [isAudioOn, setIsAudioOn] = useState(true);
 
   if (wsService.current === null) {
     wsService.current = new WebsocketService(
@@ -147,6 +156,26 @@ export function SquadRoom() {
     await createOffer();
   };
 
+  const toggleVideoOrAudio = (type: 'video' | 'audio') => {
+    if (localVideo.current?.srcObject) {
+      const mediaStream = localVideo.current.srcObject as MediaStream;
+      switch (type) {
+        case 'video':
+          mediaStream
+            .getVideoTracks()
+            .forEach((track) => (track.enabled = !track.enabled));
+          setIsVideoOn((prev) => !prev);
+          break;
+        case 'audio':
+          mediaStream
+            .getAudioTracks()
+            .forEach((track) => (track.enabled = !track.enabled));
+          setIsAudioOn((prev) => !prev);
+          break;
+      }
+    }
+  };
+
   return (
     <Stack align="center">
       <Title order={1}>Squad Room</Title>
@@ -158,11 +187,40 @@ export function SquadRoom() {
             autoPlay
             muted
             playsInline
-            style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
+            style={{
+              width: '100%',
+              height: 'auto',
+              borderRadius: '8px',
+              backgroundColor: '#000',
+            }}
           />
           <Title order={5} mt="sm">
             Local Video
           </Title>
+          <Group mt="md" justify="center">
+            <Button
+              leftSection={
+                isVideoOn ? <IconVideo size={16} /> : <IconVideoOff size={16} />
+              }
+              color={isVideoOn ? 'green' : 'red'}
+              onClick={() => toggleVideoOrAudio('video')}
+            >
+              {isVideoOn ? 'Turn Off Video' : 'Turn On Video'}
+            </Button>
+            <Button
+              leftSection={
+                isAudioOn ? (
+                  <IconMicrophone size={16} />
+                ) : (
+                  <IconMicrophoneOff size={16} />
+                )
+              }
+              color={isAudioOn ? 'green' : 'red'}
+              onClick={() => toggleVideoOrAudio('audio')}
+            >
+              {isAudioOn ? 'Mute' : 'Unmute'}
+            </Button>
+          </Group>
         </Card>
 
         <Card shadow="sm" padding="lg" radius="md" withBorder>
@@ -170,7 +228,12 @@ export function SquadRoom() {
             ref={remoteVideo}
             autoPlay
             playsInline
-            style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
+            style={{
+              width: '100%',
+              height: 'auto',
+              borderRadius: '8px',
+              backgroundColor: '#000',
+            }}
           />
           <Title order={5} mt="sm">
             Remote Video
