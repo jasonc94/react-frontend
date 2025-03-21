@@ -42,10 +42,10 @@ export function SquadRoom() {
 
   // Peer Connection
   useEffect(() => {
-    if (!peerConnection && localStream) {
-      createPeerConnection();
+    if (peerConnection && localStream) {
+      startWsConnection();
     }
-  }, [localStream]);
+  }, [peerConnection, localStream]);
 
   const startWsConnection = () => {
     ws.current = new WebSocket('ws://localhost:8000/ws/testing-room/');
@@ -56,25 +56,18 @@ export function SquadRoom() {
     };
 
     ws.current.onmessage = async (event) => {
-      console.log('WebSocket message received:', event.data);
       const data = JSON.parse(event.data);
       const type = data.type;
+      console.log('WebSocket message received:', type);
       switch (type) {
         case 'offer':
-          if (!peerConnection) {
-            createPeerConnection();
-          }
           await createAnswer(data.payload);
           break;
         case 'answer':
-          if (peerConnection) {
-            await handleAnswer(data.payload);
-          }
+          await handleAnswer(data.payload);
           break;
         case 'icecandidate':
-          if (peerConnection) {
-            await handleIceCandidate(data.payload);
-          }
+          await handleIceCandidate(data.payload);
           break;
       }
     };
@@ -105,7 +98,7 @@ export function SquadRoom() {
     };
 
     pc.onicecandidate = (event) => {
-      console.log('ICE candidate:', event.candidate);
+      console.log('New ICE candidateReceived');
       if (event.candidate) {
         ws.current?.send(
           JSON.stringify({ type: 'icecandidate', payload: event.candidate })
@@ -127,16 +120,6 @@ export function SquadRoom() {
 
     setPeerConnection(pc);
     console.log('Peer connection created');
-  };
-
-  const joinSquadRoom = async () => {
-    if (!peerConnection) {
-      return;
-    }
-
-    if (ws.current?.readyState !== WebSocket.OPEN) {
-      startWsConnection();
-    }
   };
 
   const createOffer = async () => {
@@ -180,6 +163,13 @@ export function SquadRoom() {
       await peerConnection?.addIceCandidate(candidate);
     } catch (e) {
       console.error('error adding ice candidate', e);
+    }
+  };
+
+  const joinSquadRoom = async () => {
+    if (!peerConnection) {
+      createPeerConnection();
+      return;
     }
   };
 
