@@ -1,16 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from './squad-room.module.scss';
 import WebsocketService from '../services/websocket-service';
+import { Button, Card, Group, Stack, Title } from '@mantine/core';
 
 export function SquadRoom() {
   const localVideo = useRef<HTMLVideoElement | null>(null);
   const remoteVideo = useRef<HTMLVideoElement | null>(null);
   const wsService = useRef<WebsocketService | null>(null);
+  const localStream = useRef<MediaStream>(null);
   const peerConnection = useRef<RTCPeerConnection | null>(null);
-
-  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
-  // const [peerConnection, setPeerConnection] =
-  //   useState<RTCPeerConnection | null>(null);
 
   if (wsService.current === null) {
     wsService.current = new WebsocketService(
@@ -26,42 +24,36 @@ export function SquadRoom() {
           video: true,
           audio: true,
         });
-        setLocalStream(stream);
+        localStream.current = stream;
         if (localVideo.current) {
           localVideo.current.srcObject = stream;
+          createPeerConnection();
         }
       } catch (error) {
         console.error('Error accessing media devices:', error);
       }
     };
 
-    initLocalStream();
+    if (localStream.current === null) {
+      initLocalStream();
+    }
 
+    wsService.current?.on('offer', createAnswer);
+    wsService.current?.on('answer', handleAnswer);
+    wsService.current?.on('icecandidate', handleIceCandidate);
     wsService.current?.connect();
 
     // Cleanup
     return () => {
-      if (localStream) {
-        localStream.getTracks().forEach((track) => track.stop());
+      if (localStream.current) {
+        localStream.current?.getTracks().forEach((track) => track.stop());
       }
       wsService.current?.disconnect();
     };
   }, []);
 
-  // Peer Connection
-  useEffect(() => {
-    if (localStream) {
-      if (!peerConnection.current) {
-        createPeerConnection();
-      }
-      // wsService.current?.onOpen(createOffer);
-      wsService.current?.on('offer', createAnswer);
-      wsService.current?.on('answer', handleAnswer);
-      wsService.current?.on('icecandidate', handleIceCandidate);
-    }
-  }, [localStream]);
-
   const createPeerConnection = () => {
+    if (peerConnection.current) return;
     const pc = new RTCPeerConnection({
       iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
@@ -97,10 +89,10 @@ export function SquadRoom() {
       }
     };
 
-    if (localStream) {
-      localStream
+    if (localStream.current) {
+      localStream.current
         .getTracks()
-        .forEach((track) => pc.addTrack(track, localStream));
+        .forEach((track) => pc.addTrack(track, localStream.current!));
     }
 
     peerConnection.current = pc;
@@ -152,22 +144,44 @@ export function SquadRoom() {
   };
 
   const joinSquadRoom = async () => {
-    // if (!peerConnection) {
-    //   createPeerConnection();
-    //   return;
-    // }
     await createOffer();
   };
 
   return (
-    <div>
-      <h1>Squad Room</h1>
-      <div>
-        <video ref={localVideo} autoPlay muted playsInline />
-        <video ref={remoteVideo} autoPlay playsInline />
-      </div>
-      <button onClick={joinSquadRoom}>Join Squad Room</button>
-    </div>
+    <Stack align="center">
+      <Title order={1}>Squad Room</Title>
+
+      <Group grow>
+        <Card shadow="sm" padding="lg" radius="md" withBorder>
+          <video
+            ref={localVideo}
+            autoPlay
+            muted
+            playsInline
+            style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
+          />
+          <Title order={5} mt="sm">
+            Local Video
+          </Title>
+        </Card>
+
+        <Card shadow="sm" padding="lg" radius="md" withBorder>
+          <video
+            ref={remoteVideo}
+            autoPlay
+            playsInline
+            style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
+          />
+          <Title order={5} mt="sm">
+            Remote Video
+          </Title>
+        </Card>
+      </Group>
+
+      <Button onClick={joinSquadRoom} size="lg" radius="xl">
+        Join Squad Room
+      </Button>
+    </Stack>
   );
 }
 
