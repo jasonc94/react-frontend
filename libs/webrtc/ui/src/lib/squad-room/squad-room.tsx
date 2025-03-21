@@ -42,19 +42,21 @@ export function SquadRoom() {
 
   // Peer Connection
   useEffect(() => {
-    if (!peerConnection) {
+    if (!peerConnection && localStream) {
       createPeerConnection();
     }
-  }, []);
+  }, [localStream]);
 
   const startWsConnection = () => {
     ws.current = new WebSocket('ws://localhost:8000/ws/testing-room/');
 
-    ws.current.onopen = () => {
+    ws.current.onopen = async () => {
       console.log('WebSocket connection opened');
+      await createOffer();
     };
 
     ws.current.onmessage = async (event) => {
+      console.log('WebSocket message received:', event.data);
       const data = JSON.parse(event.data);
       const type = data.type;
       switch (type) {
@@ -62,35 +64,19 @@ export function SquadRoom() {
           if (!peerConnection) {
             createPeerConnection();
           }
-          if (peerConnection) {
-            await peerConnection.setRemoteDescription(
-              new RTCSessionDescription(data.payload)
-            );
-            const answer = await peerConnection.createAnswer();
-            await peerConnection.setLocalDescription(answer);
-            ws?.current?.send(
-              JSON.stringify({ type: 'answer', payload: answer })
-            );
-          }
+          await createAnswer(data.payload);
           break;
         case 'answer':
           if (peerConnection) {
-            await peerConnection.setRemoteDescription(
-              new RTCSessionDescription(data.payload)
-            );
+            await handleAnswer(data.payload);
           }
           break;
         case 'icecandidate':
           if (peerConnection) {
-            try {
-              await peerConnection.addIceCandidate(data.payload);
-            } catch (e) {
-              console.error('error adding ice candidate', e);
-            }
+            await handleIceCandidate(data.payload);
           }
           break;
       }
-      console.log('WebSocket message received:', event.data);
     };
 
     ws.current.onclose = () => {
@@ -100,10 +86,26 @@ export function SquadRoom() {
 
   const createPeerConnection = () => {
     const pc = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun.l.google.com:5349' },
+        { urls: 'stun:stun1.l.google.com:3478' },
+        { urls: 'stun:stun1.l.google.com:5349' },
+        { urls: 'stun:stun2.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:5349' },
+        { urls: 'stun:stun3.l.google.com:3478' },
+        { urls: 'stun:stun3.l.google.com:5349' },
+        { urls: 'stun:stun4.l.google.com:19302' },
+        { urls: 'stun:stun4.l.google.com:5349' },
+      ],
     });
 
+    pc.oniceconnectionstatechange = () => {
+      console.log('ICE connection state:', pc.iceConnectionState);
+    };
+
     pc.onicecandidate = (event) => {
+      console.log('ICE candidate:', event.candidate);
       if (event.candidate) {
         ws.current?.send(
           JSON.stringify({ type: 'icecandidate', payload: event.candidate })
@@ -132,17 +134,52 @@ export function SquadRoom() {
       return;
     }
 
-    startWsConnection();
+    if (ws.current?.readyState !== WebSocket.OPEN) {
+      startWsConnection();
+    }
+  };
 
+  const createOffer = async () => {
     try {
       const offer = await peerConnection?.createOffer();
       await peerConnection?.setLocalDescription(offer);
-
       ws?.current?.send(JSON.stringify({ type: 'offer', payload: offer }));
-
-      console.log('Offer sent successfully');
+      console.log('Offer created');
     } catch (error) {
       console.error('Error creating offer:', error);
+    }
+  };
+
+  const createAnswer = async (offer: RTCSessionDescription) => {
+    try {
+      await peerConnection?.setRemoteDescription(
+        new RTCSessionDescription(offer)
+      );
+      const answer = await peerConnection?.createAnswer();
+      await peerConnection?.setLocalDescription(answer);
+      ws?.current?.send(JSON.stringify({ type: 'answer', payload: answer }));
+      console.log('Answer created');
+    } catch (error) {
+      console.error('Error creating answer:', error);
+    }
+  };
+
+  const handleAnswer = async (answer: RTCSessionDescription) => {
+    try {
+      await peerConnection?.setRemoteDescription(
+        new RTCSessionDescription(answer)
+      );
+      console.log('Answer received');
+    } catch (error) {
+      console.error('Handle Answer - Error setting remote description:', error);
+    }
+  };
+
+  const handleIceCandidate = async (candidate: RTCIceCandidate) => {
+    try {
+      await peerConnection?.addIceCandidate(candidate);
+    } catch (e) {
+      console.error('error adding ice candidate', e);
     }
   };
 
