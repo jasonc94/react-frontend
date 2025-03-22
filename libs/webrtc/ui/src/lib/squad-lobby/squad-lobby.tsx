@@ -14,12 +14,14 @@ import {
   TextInput,
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
+import { useNavigate } from 'react-router-dom';
 
 export function SquadLobby() {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [newSquadName, setNewSquadName] = useState('');
   const [searchString, setSearchString] = useState('');
   const [squads, setSquads] = useState(['Alpha', 'Bravo', 'Charlie']);
+  const navigate = useNavigate();
 
   const filteredSquads = squads.filter((room) =>
     room.toLowerCase().includes(searchString.toLowerCase())
@@ -40,8 +42,6 @@ export function SquadLobby() {
       setIsPopoverOpen(false);
     }
   };
-
-  const joinSquad = (squad: string) => {};
 
   return (
     <div>
@@ -93,7 +93,7 @@ export function SquadLobby() {
             <Card key={index} shadow="sm" padding="lg" withBorder>
               <Group justify="space-between">
                 <Text>{squad}</Text>
-                <Button onClick={() => console.log(`Joining ${squad}`)}>
+                <Button onClick={() => navigate(`/squad-connect/${squad}`)}>
                   Join
                 </Button>
               </Group>

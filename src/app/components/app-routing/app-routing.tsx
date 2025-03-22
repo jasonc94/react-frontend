@@ -13,6 +13,7 @@ export function AppRouting() {
       <Route path="/stock/:stockId" element={<DetailsPage />} />
       <Route path="/games" element={<Game2048 />}></Route>
       <Route path="/squad-connect" element={<SquadLobby />}></Route>
+      <Route path="/squad-connect/:room" element={<SquadRoom />}></Route>
     </Routes>
   );
 }
