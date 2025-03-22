@@ -10,8 +10,10 @@ import {
 
 export function UserVideo({
   mediaStream,
+  userId,
 }: {
   mediaStream: MediaStream | null;
+  userId: string;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isVideoOn, setIsVideoOn] = useState(true);
@@ -58,7 +60,7 @@ export function UserVideo({
         }}
       />
       <Title order={5} mt="sm">
-        Local Video
+        User: {userId}
       </Title>
       <Group mt="md" justify="center">
         <Tooltip

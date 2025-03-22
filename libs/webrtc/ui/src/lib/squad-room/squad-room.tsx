@@ -10,11 +10,15 @@ export function SquadRoom() {
   const { room } = useParams(); // Get the room parameter from the URL
   const remoteVideo = useRef<HTMLVideoElement | null>(null);
   const wsService = useRef<WebsocketService | null>(null);
-  const localOffer = useRef<RTCSessionDescriptionInit | null>(null);
 
   const [peerConnections, setPeerConnections] = useState<{
     [senderId: string]: RTCPeerConnection;
   }>({});
+  const [status, setStatus] = useState<'init' | 'waiting' | 'connected'>(
+    'init'
+  );
+
+  const [websocketConnected, setWebsocketConnected] = useState(false);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
 
   const userId = useRef<string>(null);
@@ -42,9 +46,13 @@ export function SquadRoom() {
         console.error('Error accessing media devices:', error);
       }
     };
+    if (!localStream) {
+      initLocalStream();
+    }
 
-    initLocalStream();
-
+    wsService.current?.onOpen(() => {
+      setWebsocketConnected(true);
+    });
     wsService.current?.connect();
 
     // Cleanup
@@ -57,6 +65,13 @@ export function SquadRoom() {
   }, []);
 
   useEffect(() => {
+    if (localStream && websocketConnected) {
+      setStatus('waiting');
+    }
+  }, [localStream, websocketConnected]);
+
+  // **important** - these callbacks needs to be reassigned when peerconnection changes
+  useEffect(() => {
     if (localStream && userId.current) {
       wsService.current?.on('join', handleJoin);
       wsService.current?.on('leave', handleLeave);
@@ -66,15 +81,15 @@ export function SquadRoom() {
     }
   }, [peerConnections, localStream]);
 
+  // create peer connection and send offer for the new user joining room
   const handleJoin = async (peerId: string) => {
-    // create peer connection and send offer for the new user joining room
     const pc = createPeerConnection(peerId);
     await createOffer(pc);
     console.log('Peer joined the room', peerId);
   };
 
+  // cleanup peer connection when user leaves the room
   const handleLeave = async (peerId: string) => {
-    // cleanup peer connection when user leaves the room
     peerConnections[peerId]?.close();
     setPeerConnections((prev) => {
       const copy = { ...prev };
@@ -196,8 +211,21 @@ export function SquadRoom() {
   };
 
   const joinSquadCall = async () => {
-    // createPeerConnection(userId.current!);
-    // await createOffer();
+    wsService?.current?.send({
+      sender: userId.current!,
+      type: 'join',
+      payload: { type: 'join', payload: { userId: userId.current } },
+    });
+    setStatus('connected');
+  };
+
+  const leaveSquadCall = async () => {
+    wsService?.current?.send({
+      sender: userId.current!,
+      type: 'leave',
+      payload: { type: 'leave', payload: { userId: userId.current } },
+    });
+    setStatus('waiting');
   };
 
   return (
@@ -205,60 +233,10 @@ export function SquadRoom() {
       <Title order={1}>Welcome to {room}!</Title>
 
       <Group grow>
-        {/* <Card shadow="sm" padding="lg" radius="md" withBorder>
-          <video
-            ref={localVideo}
-            autoPlay
-            muted
-            playsInline
-            style={{
-              width: '100%',
-              height: 'auto',
-              borderRadius: '8px',
-              backgroundColor: '#000',
-            }}
-          />
-          <Title order={5} mt="sm">
-            Local Video
-          </Title>
-          <Group mt="md" justify="center">
-            <Tooltip
-              label={isVideoOn ? 'Turn Off Video' : 'Turn On Video'}
-              withArrow
-            >
-              <ActionIcon
-                size="xl"
-                radius="xl"
-                variant="filled"
-                color={isVideoOn ? undefined : 'red'}
-                onClick={() => toggleVideoOrAudio('video')}
-              >
-                {isVideoOn ? (
-                  <IconVideo size={24} />
-                ) : (
-                  <IconVideoOff size={24} />
-                )}
-              </ActionIcon>
-            </Tooltip>
-
-            <Tooltip label={isAudioOn ? 'Mute' : 'Unmute'} withArrow>
-              <ActionIcon
-                size="xl"
-                radius="xl"
-                variant="filled"
-                color={isAudioOn ? undefined : 'red'}
-                onClick={() => toggleVideoOrAudio('audio')}
-              >
-                {isAudioOn ? (
-                  <IconMicrophone size={24} />
-                ) : (
-                  <IconMicrophoneOff size={24} />
-                )}
-              </ActionIcon>
-            </Tooltip>
-          </Group>
-        </Card> */}
-        <UserVideo mediaStream={localStream}></UserVideo>
+        <UserVideo
+          mediaStream={localStream}
+          userId={userId.current!}
+        ></UserVideo>
 
         <Card shadow="sm" padding="lg" radius="md" withBorder>
           <video
@@ -277,10 +255,20 @@ export function SquadRoom() {
           </Title>
         </Card>
       </Group>
-
-      <Button onClick={joinSquadCall} size="lg" radius="xl">
-        Join Squad Call
-      </Button>
+      {status === 'connected' ? (
+        <Button onClick={leaveSquadCall} size="lg" radius="xl">
+          Leave
+        </Button>
+      ) : (
+        <Button
+          onClick={joinSquadCall}
+          size="lg"
+          radius="xl"
+          disabled={status === 'init'}
+        >
+          Join Squad Call
+        </Button>
+      )}
     </Stack>
   );
 }

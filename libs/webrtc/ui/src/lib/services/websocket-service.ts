@@ -66,6 +66,10 @@ class WebsocketService {
     this.ws?.send(JSON.stringify(message));
   }
 
+  readyState() {
+    return this.ws?.readyState;
+  }
+
   disconnect() {
     this.ws?.close();
     this.ws = null;
