@@ -16,8 +16,10 @@ import {
   IconVideo,
   IconVideoOff,
 } from '@tabler/icons-react';
+import { useParams } from 'react-router-dom';
 
 export function SquadRoom() {
+  const { room } = useParams(); // Get the room parameter from the URL
   const localVideo = useRef<HTMLVideoElement | null>(null);
   const remoteVideo = useRef<HTMLVideoElement | null>(null);
   const wsService = useRef<WebsocketService | null>(null);
@@ -29,7 +31,7 @@ export function SquadRoom() {
 
   if (wsService.current === null) {
     wsService.current = new WebsocketService(
-      'ws://localhost:8000/ws/testing-room/'
+      `ws://localhost:8000/ws/squad-connect/${room}/`
     );
   }
 
@@ -186,7 +188,7 @@ export function SquadRoom() {
 
   return (
     <Stack align="center">
-      <Title order={1}>Squad Room</Title>
+      <Title order={1}>Welcome to {room}!</Title>
 
       <Group grow>
         <Card shadow="sm" padding="lg" radius="md" withBorder>
