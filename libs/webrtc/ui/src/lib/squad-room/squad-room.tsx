@@ -8,18 +8,19 @@ import UserVideo from '../user-video/user-video';
 
 export function SquadRoom() {
   const { room } = useParams(); // Get the room parameter from the URL
-  const remoteVideo = useRef<HTMLVideoElement | null>(null);
   const wsService = useRef<WebsocketService | null>(null);
 
+  const [websocketConnected, setWebsocketConnected] = useState(false);
+  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [peerConnections, setPeerConnections] = useState<{
     [senderId: string]: RTCPeerConnection;
   }>({});
   const [status, setStatus] = useState<'init' | 'waiting' | 'connected'>(
     'init'
   );
-
-  const [websocketConnected, setWebsocketConnected] = useState(false);
-  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+  const [peerStreams, setPeerStreams] = useState<{
+    [senderId: string]: MediaStream;
+  }>({});
 
   const userId = useRef<string>(null);
 
@@ -92,6 +93,11 @@ export function SquadRoom() {
   const handleLeave = async (peerId: string) => {
     peerConnections[peerId]?.close();
     setPeerConnections((prev) => {
+      const copy = { ...prev };
+      delete copy[peerId];
+      return copy;
+    });
+    setPeerStreams((prev) => {
       const copy = { ...prev };
       delete copy[peerId];
       return copy;
@@ -194,9 +200,8 @@ export function SquadRoom() {
     };
 
     pc.ontrack = (event) => {
-      if (remoteVideo.current) {
-        remoteVideo.current.srcObject = event.streams[0];
-      }
+      const stream = event.streams[0];
+      setPeerStreams((prev) => ({ ...prev, [peerId]: stream }));
     };
 
     if (localStream) {
@@ -238,22 +243,13 @@ export function SquadRoom() {
           userId={userId.current!}
         ></UserVideo>
 
-        <Card shadow="sm" padding="lg" radius="md" withBorder>
-          <video
-            ref={remoteVideo}
-            autoPlay
-            playsInline
-            style={{
-              width: '100%',
-              height: 'auto',
-              borderRadius: '8px',
-              backgroundColor: '#000',
-            }}
-          />
-          <Title order={5} mt="sm">
-            Remote Video
-          </Title>
-        </Card>
+        {Object.keys(peerStreams).map((peerId) => (
+          <UserVideo
+            key={peerId}
+            mediaStream={peerStreams[peerId]}
+            userId={peerId}
+          ></UserVideo>
+        ))}
       </Group>
       {status === 'connected' ? (
         <Button onClick={leaveSquadCall} size="lg" radius="xl">
