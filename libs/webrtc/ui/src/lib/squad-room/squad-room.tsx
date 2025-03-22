@@ -10,9 +10,10 @@ export function SquadRoom() {
   const { room } = useParams(); // Get the room parameter from the URL
   const remoteVideo = useRef<HTMLVideoElement | null>(null);
   const wsService = useRef<WebsocketService | null>(null);
+  const localOffer = useRef<RTCSessionDescriptionInit | null>(null);
 
   const [peerConnections, setPeerConnections] = useState<{
-    [id: string]: RTCPeerConnection;
+    [senderId: string]: RTCPeerConnection;
   }>({});
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
 
@@ -55,68 +56,36 @@ export function SquadRoom() {
     };
   }, []);
 
-  // Peer connnection and ws connection setup
   useEffect(() => {
     if (localStream && userId.current) {
-      createPeerConnection(userId.current!);
-      wsService.current?.on('offer', createAnswer);
+      wsService.current?.on('join', handleJoin);
+      wsService.current?.on('leave', handleLeave);
+      wsService.current?.on('offer', handleOffer);
       wsService.current?.on('answer', handleAnswer);
       wsService.current?.on('icecandidate', handleIceCandidate);
     }
   }, [peerConnections, localStream]);
 
-  // const createPeerConnection = () => {
-  //   if (peerConnection.current) return;
-  //   const pc = new RTCPeerConnection({
-  //     iceServers: [
-  //       { urls: 'stun:stun.l.google.com:19302' },
-  //       { urls: 'stun:stun.l.google.com:5349' },
-  //       { urls: 'stun:stun1.l.google.com:3478' },
-  //       { urls: 'stun:stun1.l.google.com:5349' },
-  //       { urls: 'stun:stun2.l.google.com:19302' },
-  //       { urls: 'stun:stun2.l.google.com:5349' },
-  //       { urls: 'stun:stun3.l.google.com:3478' },
-  //       { urls: 'stun:stun3.l.google.com:5349' },
-  //       { urls: 'stun:stun4.l.google.com:19302' },
-  //       { urls: 'stun:stun4.l.google.com:5349' },
-  //     ],
-  //   });
+  const handleJoin = async (peerId: string) => {
+    // create peer connection and send offer for the new user joining room
+    const pc = createPeerConnection(peerId);
+    await createOffer(pc);
+    console.log('Peer joined the room', peerId);
+  };
 
-  //   pc.oniceconnectionstatechange = () => {
-  //     console.log('ICE connection state:', pc.iceConnectionState);
-  //   };
+  const handleLeave = async (peerId: string) => {
+    // cleanup peer connection when user leaves the room
+    peerConnections[peerId]?.close();
+    setPeerConnections((prev) => {
+      const copy = { ...prev };
+      delete copy[peerId];
+      return copy;
+    });
+    console.log('Peer left the room', peerId);
+  };
 
-  //   pc.onicecandidate = (event) => {
-  //     console.log('New ICE candidateReceived');
-  //     if (event.candidate) {
-  //       wsService.current?.send({
-  //         sender: userId,
-  //         type: 'icecandidate',
-  //         payload: event.candidate,
-  //       });
-  //     }
-  //   };
-
-  //   pc.ontrack = (event) => {
-  //     if (remoteVideo.current) {
-  //       remoteVideo.current.srcObject = event.streams[0];
-  //     }
-  //   };
-
-  //   if (localStream) {
-  //     localStream
-  //       .getTracks()
-  //       .forEach((track) => pc.addTrack(track, localStream));
-  //   }
-
-  //   peerConnection.current = pc;
-  //   console.log('Peer connection created');
-  // };
-
-  const createOffer = async () => {
+  const createOffer = async (pc: RTCPeerConnection) => {
     try {
-      const pc = peerConnections[userId.current!];
-      if (!pc) return;
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
       wsService?.current?.send({
@@ -130,10 +99,10 @@ export function SquadRoom() {
     }
   };
 
-  const createAnswer = async (sender: string, offer: RTCSessionDescription) => {
+  const handleOffer = async (peerId: string, offer: RTCSessionDescription) => {
     try {
-      const pc = peerConnections[userId.current!];
-      if (!pc) return;
+      // create peer connection for the offer sender
+      const pc = createPeerConnection(peerId);
       await pc.setRemoteDescription(new RTCSessionDescription(offer));
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
@@ -142,21 +111,22 @@ export function SquadRoom() {
         type: 'answer',
         payload: answer,
       });
-      console.log('Answer created');
+      console.log('Offer handled, answer created');
     } catch (error) {
       console.error('Error creating answer:', error);
     }
   };
 
   const handleAnswer = async (
-    sender: string,
+    peerId: string,
     answer: RTCSessionDescription
   ) => {
     try {
-      const pc = peerConnections[userId.current!];
+      //  acknowledge the answer
+      const pc = peerConnections[peerId];
       if (!pc) return;
       await pc.setRemoteDescription(new RTCSessionDescription(answer));
-      console.log('Answer received');
+      console.log('Answer Handled');
     } catch (error) {
       console.error('Handle Answer - Error setting remote description:', error);
     }
@@ -167,7 +137,7 @@ export function SquadRoom() {
     candidate: RTCIceCandidate
   ) => {
     try {
-      const pc = peerConnections[userId.current!];
+      const pc = peerConnections[sender];
       if (!pc) return;
       await pc.addIceCandidate(candidate);
     } catch (e) {
@@ -175,8 +145,8 @@ export function SquadRoom() {
     }
   };
 
-  const createPeerConnection = (userId: string) => {
-    if (peerConnections[userId]) return peerConnections[userId];
+  const createPeerConnection = (peerId: string) => {
+    if (peerConnections[peerId]) return peerConnections[peerId];
 
     const pc = new RTCPeerConnection({
       iceServers: [
@@ -201,7 +171,7 @@ export function SquadRoom() {
       console.log('New ICE candidateReceived');
       if (event.candidate) {
         wsService.current?.send({
-          sender: userId,
+          sender: userId.current!,
           type: 'icecandidate',
           payload: event.candidate,
         });
@@ -220,14 +190,14 @@ export function SquadRoom() {
         .forEach((track) => pc.addTrack(track, localStream));
     }
 
-    setPeerConnections((prev) => ({ ...prev, [userId]: pc }));
-    console.log('Peer connection created', userId);
+    setPeerConnections((prev) => ({ ...prev, [peerId]: pc }));
+    console.log('Peer connection created', peerId);
     return pc;
   };
 
   const joinSquadCall = async () => {
     // createPeerConnection(userId.current!);
-    await createOffer();
+    // await createOffer();
   };
 
   return (
