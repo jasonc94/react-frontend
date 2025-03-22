@@ -94,7 +94,7 @@ export function SquadLobby() {
               <Group justify="space-between">
                 <Text>{squad}</Text>
                 <Button onClick={() => navigate(`/squad-connect/${squad}`)}>
-                  Join
+                  Enter Squad Room
                 </Button>
               </Group>
             </Card>

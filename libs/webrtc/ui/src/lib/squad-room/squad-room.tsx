@@ -1,33 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from './squad-room.module.scss';
 import WebsocketService from '../services/websocket-service';
-import {
-  ActionIcon,
-  Button,
-  Card,
-  Group,
-  Stack,
-  Title,
-  Tooltip,
-} from '@mantine/core';
-import {
-  IconMicrophone,
-  IconMicrophoneOff,
-  IconVideo,
-  IconVideoOff,
-} from '@tabler/icons-react';
+import { Button, Card, Group, Stack, Title } from '@mantine/core';
+
 import { useParams } from 'react-router-dom';
+import UserVideo from '../user-video/user-video';
 
 export function SquadRoom() {
   const { room } = useParams(); // Get the room parameter from the URL
-  const localVideo = useRef<HTMLVideoElement | null>(null);
   const remoteVideo = useRef<HTMLVideoElement | null>(null);
   const wsService = useRef<WebsocketService | null>(null);
-  const localStream = useRef<MediaStream>(null);
   const peerConnection = useRef<RTCPeerConnection | null>(null);
 
-  const [isVideoOn, setIsVideoOn] = useState(true);
-  const [isAudioOn, setIsAudioOn] = useState(true);
+  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
 
   if (wsService.current === null) {
     wsService.current = new WebsocketService(
@@ -43,33 +28,33 @@ export function SquadRoom() {
           video: true,
           audio: true,
         });
-        localStream.current = stream;
-        if (localVideo.current) {
-          localVideo.current.srcObject = stream;
-          createPeerConnection();
-        }
+        setLocalStream(stream);
       } catch (error) {
         console.error('Error accessing media devices:', error);
       }
     };
 
-    if (localStream.current === null) {
-      initLocalStream();
-    }
-
-    wsService.current?.on('offer', createAnswer);
-    wsService.current?.on('answer', handleAnswer);
-    wsService.current?.on('icecandidate', handleIceCandidate);
-    wsService.current?.connect();
+    initLocalStream();
 
     // Cleanup
     return () => {
-      if (localStream.current) {
-        localStream.current?.getTracks().forEach((track) => track.stop());
+      if (localStream) {
+        localStream?.getTracks().forEach((track) => track.stop());
       }
       wsService.current?.disconnect();
     };
   }, []);
+
+  // Peer connnection and ws connection setup
+  useEffect(() => {
+    if (peerConnection.current === null && localStream) {
+      createPeerConnection();
+      wsService.current?.on('offer', createAnswer);
+      wsService.current?.on('answer', handleAnswer);
+      wsService.current?.on('icecandidate', handleIceCandidate);
+      wsService.current?.connect();
+    }
+  }, [localStream]);
 
   const createPeerConnection = () => {
     if (peerConnection.current) return;
@@ -108,10 +93,10 @@ export function SquadRoom() {
       }
     };
 
-    if (localStream.current) {
-      localStream.current
+    if (localStream) {
+      localStream
         .getTracks()
-        .forEach((track) => pc.addTrack(track, localStream.current!));
+        .forEach((track) => pc.addTrack(track, localStream));
     }
 
     peerConnection.current = pc;
@@ -162,28 +147,8 @@ export function SquadRoom() {
     }
   };
 
-  const joinSquadRoom = async () => {
+  const joinSquadCall = async () => {
     await createOffer();
-  };
-
-  const toggleVideoOrAudio = (type: 'video' | 'audio') => {
-    if (localVideo.current?.srcObject) {
-      const mediaStream = localVideo.current.srcObject as MediaStream;
-      switch (type) {
-        case 'video':
-          mediaStream
-            .getVideoTracks()
-            .forEach((track) => (track.enabled = !track.enabled));
-          setIsVideoOn((prev) => !prev);
-          break;
-        case 'audio':
-          mediaStream
-            .getAudioTracks()
-            .forEach((track) => (track.enabled = !track.enabled));
-          setIsAudioOn((prev) => !prev);
-          break;
-      }
-    }
   };
 
   return (
@@ -191,7 +156,7 @@ export function SquadRoom() {
       <Title order={1}>Welcome to {room}!</Title>
 
       <Group grow>
-        <Card shadow="sm" padding="lg" radius="md" withBorder>
+        {/* <Card shadow="sm" padding="lg" radius="md" withBorder>
           <video
             ref={localVideo}
             autoPlay
@@ -243,7 +208,8 @@ export function SquadRoom() {
               </ActionIcon>
             </Tooltip>
           </Group>
-        </Card>
+        </Card> */}
+        <UserVideo mediaStream={localStream}></UserVideo>
 
         <Card shadow="sm" padding="lg" radius="md" withBorder>
           <video
@@ -263,8 +229,8 @@ export function SquadRoom() {
         </Card>
       </Group>
 
-      <Button onClick={joinSquadRoom} size="lg" radius="xl">
-        Join Squad Room
+      <Button onClick={joinSquadCall} size="lg" radius="xl">
+        Join Squad Call
       </Button>
     </Stack>
   );
