@@ -3,6 +3,7 @@ import styles from './squad-lobby.module.scss';
 import {
   Button,
   Card,
+  Center,
   Flex,
   Group,
   Input,
@@ -81,6 +82,12 @@ export function SquadLobby() {
 
       {/* Squad Room List */}
       <Stack mt="md">
+        <Center>
+          <Text fw={500} size="xl" mb="md">
+            Available Squad Rooms
+          </Text>
+        </Center>
+
         {filteredSquads.length > 0 ? (
           filteredSquads.map((squad, index) => (
             <Card key={index} shadow="sm" padding="lg" withBorder>
@@ -93,7 +100,9 @@ export function SquadLobby() {
             </Card>
           ))
         ) : (
-          <Text>No rooms found</Text>
+          <Center>
+            <Text>No rooms found</Text>
+          </Center>
         )}
       </Stack>
     </div>
