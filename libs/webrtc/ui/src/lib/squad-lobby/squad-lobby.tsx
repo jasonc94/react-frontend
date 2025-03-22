@@ -3,91 +3,99 @@ import styles from './squad-lobby.module.scss';
 import {
   Button,
   Card,
+  Flex,
+  Group,
   Input,
   Modal,
+  Popover,
   Stack,
   Text,
   TextInput,
 } from '@mantine/core';
-
-const mockSquadRooms = ['Alpha', 'Beta', 'Gamma'];
+import { notifications } from '@mantine/notifications';
 
 export function SquadLobby() {
-  const [newSquadModalOpened, setNewSquadModalOpened] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [newSquadName, setNewSquadName] = useState('');
   const [searchString, setSearchString] = useState('');
-  const [squads, setSquads] = useState([
-    'Alpha Squad',
-    'Bravo Squad',
-    'Charlie Squad',
-  ]);
+  const [squads, setSquads] = useState(['Alpha', 'Bravo', 'Charlie']);
 
-  const filteredSquads = mockSquadRooms.filter((room) =>
+  const filteredSquads = squads.filter((room) =>
     room.toLowerCase().includes(searchString.toLowerCase())
   );
 
   const createSquad = () => {
     if (newSquadName.trim()) {
+      if (squads.includes(newSquadName)) {
+        notifications.show({
+          title: 'Error',
+          message: 'Squad already exists',
+          color: 'red',
+        });
+        return;
+      }
       setSquads([...squads, newSquadName]);
       setNewSquadName('');
-      setNewSquadModalOpened(false);
+      setIsPopoverOpen(false);
     }
   };
 
   const joinSquad = (squad: string) => {};
 
   return (
-    <div className={styles['container']}>
-      <Stack align="center">
-        <h1>Welcome to Squad Lobby!</h1>
-        <Button size="xl" onClick={() => setNewSquadModalOpened(true)}>
-          Create New Squad Room
-        </Button>
+    <div>
+      <h1>Welcome to Squad Connect!</h1>
 
-        <Card
-          className={styles['room-list-card']}
-          shadow="sm"
-          padding="lg"
-          radius="md"
-          withBorder
+      <Flex justify={'center'}>
+        <Popover
+          opened={isPopoverOpen}
+          onChange={setIsPopoverOpen}
+          position="bottom"
+          withArrow
         >
-          <Input
-            placeholder="Search squad rooms..."
-            value={searchString}
-            onChange={(e) => setSearchString(e.target.value)}
-          />
-          <Stack mt="md">
-            {filteredSquads.length > 0 ? (
-              filteredSquads.map((squad) => (
-                <Card key={squad} shadow="xs" padding="md" withBorder>
-                  <Text>{squad}</Text>
-                  <Button size="sm" onClick={() => joinSquad(squad)} mt="sm">
-                    Join Squad Room
-                  </Button>
-                </Card>
-              ))
-            ) : (
-              <Text>No rooms found</Text>
-            )}
-          </Stack>
-        </Card>
-      </Stack>
+          <Popover.Target>
+            <Button onClick={() => setIsPopoverOpen((o) => !o)}>
+              Create Squad Room
+            </Button>
+          </Popover.Target>
+          <Popover.Dropdown>
+            <Stack>
+              <Input
+                placeholder="Enter Squad Room Name"
+                value={newSquadName}
+                onChange={(e) => setNewSquadName(e.target.value)}
+              />
+              <Button onClick={createSquad}>Create</Button>
+            </Stack>
+          </Popover.Dropdown>
+        </Popover>
+      </Flex>
 
-      <Modal
-        opened={newSquadModalOpened}
-        onClose={() => setNewSquadModalOpened(false)}
-        title="Create a New Squad Room"
-      >
-        <Stack>
-          <TextInput
-            placeholder="Enter squad room name"
-            value={newSquadName}
-            onChange={(e) => setNewSquadName(e.currentTarget.value)}
-          />
-          <Button onClick={() => setNewSquadModalOpened(false)}>Cancel</Button>
-          <Button onClick={createSquad}>Ok</Button>
-        </Stack>
-      </Modal>
+      {/* Search Input */}
+      <Input
+        placeholder="Search Squad Rooms"
+        value={searchString}
+        onChange={(e) => setSearchString(e.target.value)}
+        mt="md"
+      />
+
+      {/* Squad Room List */}
+      <Stack mt="md">
+        {filteredSquads.length > 0 ? (
+          filteredSquads.map((squad, index) => (
+            <Card key={index} shadow="sm" padding="lg" withBorder>
+              <Group justify="space-between">
+                <Text>{squad}</Text>
+                <Button onClick={() => console.log(`Joining ${squad}`)}>
+                  Join
+                </Button>
+              </Group>
+            </Card>
+          ))
+        ) : (
+          <Text>No rooms found</Text>
+        )}
+      </Stack>
     </div>
   );
 }
