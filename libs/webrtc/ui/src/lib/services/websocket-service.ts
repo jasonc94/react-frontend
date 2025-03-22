@@ -1,10 +1,11 @@
 type WebsocketMessage = {
   type: string;
   payload: unknown;
+  sender: string;
 };
 
 type WebsocketCallback = {
-  [key: string]: (payload: any) => void;
+  [key: string]: (sender: string, payload: any) => void;
 };
 
 type WebSocketEventCallbacks = {
@@ -35,8 +36,9 @@ class WebsocketService {
     this.ws.onmessage = (event) => {
       const data: WebsocketMessage = JSON.parse(event.data);
       const type = data.type;
-      console.log('WebSocket message received:', type);
-      this.callbacks[type]?.(data.payload);
+      const sender = data.sender;
+      console.log('WebSocket message received:', type, sender);
+      this.callbacks[type]?.(sender, data.payload);
     };
 
     this.ws.onclose = () => {
@@ -45,7 +47,7 @@ class WebsocketService {
     };
   }
 
-  on(type: string, callBack: (payload: any) => void) {
+  on(type: string, callBack: (sender: string, payload: any) => void) {
     this.callbacks[type] = callBack;
   }
 

@@ -10,13 +10,21 @@ export function SquadRoom() {
   const { room } = useParams(); // Get the room parameter from the URL
   const remoteVideo = useRef<HTMLVideoElement | null>(null);
   const wsService = useRef<WebsocketService | null>(null);
-  const peerConnection = useRef<RTCPeerConnection | null>(null);
 
+  const [peerConnections, setPeerConnections] = useState<{
+    [id: string]: RTCPeerConnection;
+  }>({});
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+
+  const userId = useRef<string>(null);
+
+  if (!userId.current) {
+    userId.current = Math.random().toString(36).substring(2, 9);
+  }
 
   if (wsService.current === null) {
     wsService.current = new WebsocketService(
-      `ws://localhost:8000/ws/squad-connect/${room}/`
+      `ws://localhost:8000/ws/squad-connect/${room}/${userId.current}/`
     );
   }
 
@@ -36,6 +44,8 @@ export function SquadRoom() {
 
     initLocalStream();
 
+    wsService.current?.connect();
+
     // Cleanup
     return () => {
       if (localStream) {
@@ -47,17 +57,127 @@ export function SquadRoom() {
 
   // Peer connnection and ws connection setup
   useEffect(() => {
-    if (peerConnection.current === null && localStream) {
-      createPeerConnection();
+    if (localStream && userId.current) {
+      createPeerConnection(userId.current!);
       wsService.current?.on('offer', createAnswer);
       wsService.current?.on('answer', handleAnswer);
       wsService.current?.on('icecandidate', handleIceCandidate);
-      wsService.current?.connect();
     }
-  }, [localStream]);
+  }, [peerConnections, localStream]);
 
-  const createPeerConnection = () => {
-    if (peerConnection.current) return;
+  // const createPeerConnection = () => {
+  //   if (peerConnection.current) return;
+  //   const pc = new RTCPeerConnection({
+  //     iceServers: [
+  //       { urls: 'stun:stun.l.google.com:19302' },
+  //       { urls: 'stun:stun.l.google.com:5349' },
+  //       { urls: 'stun:stun1.l.google.com:3478' },
+  //       { urls: 'stun:stun1.l.google.com:5349' },
+  //       { urls: 'stun:stun2.l.google.com:19302' },
+  //       { urls: 'stun:stun2.l.google.com:5349' },
+  //       { urls: 'stun:stun3.l.google.com:3478' },
+  //       { urls: 'stun:stun3.l.google.com:5349' },
+  //       { urls: 'stun:stun4.l.google.com:19302' },
+  //       { urls: 'stun:stun4.l.google.com:5349' },
+  //     ],
+  //   });
+
+  //   pc.oniceconnectionstatechange = () => {
+  //     console.log('ICE connection state:', pc.iceConnectionState);
+  //   };
+
+  //   pc.onicecandidate = (event) => {
+  //     console.log('New ICE candidateReceived');
+  //     if (event.candidate) {
+  //       wsService.current?.send({
+  //         sender: userId,
+  //         type: 'icecandidate',
+  //         payload: event.candidate,
+  //       });
+  //     }
+  //   };
+
+  //   pc.ontrack = (event) => {
+  //     if (remoteVideo.current) {
+  //       remoteVideo.current.srcObject = event.streams[0];
+  //     }
+  //   };
+
+  //   if (localStream) {
+  //     localStream
+  //       .getTracks()
+  //       .forEach((track) => pc.addTrack(track, localStream));
+  //   }
+
+  //   peerConnection.current = pc;
+  //   console.log('Peer connection created');
+  // };
+
+  const createOffer = async () => {
+    try {
+      const pc = peerConnections[userId.current!];
+      if (!pc) return;
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      wsService?.current?.send({
+        sender: userId.current!,
+        type: 'offer',
+        payload: offer,
+      });
+      console.log('Offer created');
+    } catch (error) {
+      console.error('Error creating offer:', error);
+    }
+  };
+
+  const createAnswer = async (sender: string, offer: RTCSessionDescription) => {
+    try {
+      const pc = peerConnections[userId.current!];
+      if (!pc) return;
+      await pc.setRemoteDescription(new RTCSessionDescription(offer));
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      wsService?.current?.send({
+        sender: userId.current!,
+        type: 'answer',
+        payload: answer,
+      });
+      console.log('Answer created');
+    } catch (error) {
+      console.error('Error creating answer:', error);
+    }
+  };
+
+  const handleAnswer = async (
+    sender: string,
+    answer: RTCSessionDescription
+  ) => {
+    try {
+      const pc = peerConnections[userId.current!];
+      if (!pc) return;
+      await pc.setRemoteDescription(new RTCSessionDescription(answer));
+      console.log('Answer received');
+    } catch (error) {
+      console.error('Handle Answer - Error setting remote description:', error);
+    }
+  };
+
+  const handleIceCandidate = async (
+    sender: string,
+    candidate: RTCIceCandidate
+  ) => {
+    try {
+      const pc = peerConnections[userId.current!];
+      if (!pc) return;
+      await pc.addIceCandidate(candidate);
+    } catch (e) {
+      console.error('error adding ice candidate', e);
+    }
+  };
+
+  const createPeerConnection = (userId: string) => {
+    if (peerConnections[userId]) return peerConnections[userId];
+
     const pc = new RTCPeerConnection({
       iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
@@ -81,6 +201,7 @@ export function SquadRoom() {
       console.log('New ICE candidateReceived');
       if (event.candidate) {
         wsService.current?.send({
+          sender: userId,
           type: 'icecandidate',
           payload: event.candidate,
         });
@@ -99,55 +220,13 @@ export function SquadRoom() {
         .forEach((track) => pc.addTrack(track, localStream));
     }
 
-    peerConnection.current = pc;
-    console.log('Peer connection created');
-  };
-
-  const createOffer = async () => {
-    try {
-      const offer = await peerConnection.current?.createOffer();
-      await peerConnection.current?.setLocalDescription(offer);
-      wsService?.current?.send({ type: 'offer', payload: offer });
-      console.log('Offer created');
-    } catch (error) {
-      console.error('Error creating offer:', error);
-    }
-  };
-
-  const createAnswer = async (offer: RTCSessionDescription) => {
-    try {
-      await peerConnection.current?.setRemoteDescription(
-        new RTCSessionDescription(offer)
-      );
-      const answer = await peerConnection.current?.createAnswer();
-      await peerConnection.current?.setLocalDescription(answer);
-      wsService?.current?.send({ type: 'answer', payload: answer });
-      console.log('Answer created');
-    } catch (error) {
-      console.error('Error creating answer:', error);
-    }
-  };
-
-  const handleAnswer = async (answer: RTCSessionDescription) => {
-    try {
-      await peerConnection.current?.setRemoteDescription(
-        new RTCSessionDescription(answer)
-      );
-      console.log('Answer received');
-    } catch (error) {
-      console.error('Handle Answer - Error setting remote description:', error);
-    }
-  };
-
-  const handleIceCandidate = async (candidate: RTCIceCandidate) => {
-    try {
-      await peerConnection.current?.addIceCandidate(candidate);
-    } catch (e) {
-      console.error('error adding ice candidate', e);
-    }
+    setPeerConnections((prev) => ({ ...prev, [userId]: pc }));
+    console.log('Peer connection created', userId);
+    return pc;
   };
 
   const joinSquadCall = async () => {
+    // createPeerConnection(userId.current!);
     await createOffer();
   };
 
