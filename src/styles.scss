@@ -4,3 +4,8 @@
 @function to-rem($px) {
   @return math.div($px, 16px) * 1rem; // Directly return the value in rem
 }
+
+.flexFill {
+  flex: 1 1 0;
+  overflow: auto;
+}

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from './squad-room.module.scss';
 import WebsocketService from '../services/websocket-service';
-import { Button, Group, Stack, Title } from '@mantine/core';
+import { Button, Flex, Title } from '@mantine/core';
 
 import { useParams, useSearchParams } from 'react-router-dom';
 import UserVideo from '../user-video/user-video';
@@ -324,15 +324,21 @@ export function SquadRoom() {
   };
 
   return (
-    <Stack align="center">
+    <Flex direction={'column'} className="flexFill">
       <Title order={1}>Welcome to {room}!</Title>
 
-      <Group grow>
+      <Flex
+        gap="md"
+        wrap={'wrap'}
+        justify={'center'}
+        align={'stretch'}
+        className="flexFill"
+      >
         <UserVideo
           mediaStream={localStream}
           userId={userId.current!}
           isSelf={true}
-        ></UserVideo>
+        />
 
         {Object.keys(peerStreams).map((peerId) => (
           <UserVideo
@@ -341,7 +347,8 @@ export function SquadRoom() {
             userId={peerId}
           ></UserVideo>
         ))}
-      </Group>
+      </Flex>
+
       {status === 'connected' ? (
         <Button onClick={leaveSquadCall} size="lg" radius="xl">
           Leave
@@ -374,7 +381,7 @@ export function SquadRoom() {
       >
         Stop Screen Share
       </Button>
-    </Stack>
+    </Flex>
   );
 }
 

@@ -10,6 +10,7 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import SideNav from '../side-nav/side-nav';
 import AppRouting from '../app-routing/app-routing';
+import classes from './app-main-shell.module.scss';
 
 export function AppMainShell() {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
@@ -65,7 +66,7 @@ export function AppMainShell() {
       <AppShell.Navbar p="md">
         <SideNav />
       </AppShell.Navbar>
-      <AppShell.Main>
+      <AppShell.Main className={classes.main}>
         <AppRouting />
       </AppShell.Main>
     </AppShell>
