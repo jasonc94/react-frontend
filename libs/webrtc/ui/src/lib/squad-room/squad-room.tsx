@@ -90,13 +90,14 @@ export function SquadRoom() {
       wsService.current?.on('offer', handleOffer);
       wsService.current?.on('answer', handleAnswer);
       wsService.current?.on('icecandidate', handleIceCandidate);
-    } else {
-      wsService.current?.on('join', noop);
-      wsService.current?.on('leave', noop);
-      wsService.current?.on('offer', noop);
-      wsService.current?.on('answer', noop);
-      wsService.current?.on('icecandidate', noop);
     }
+    // else {
+    //   wsService.current?.on('join', noop);
+    //   wsService.current?.on('leave', noop);
+    //   wsService.current?.on('offer', noop);
+    //   wsService.current?.on('answer', noop);
+    //   wsService.current?.on('icecandidate', noop);
+    // }
   }, [peerConnections, localStream, status]);
 
   // create peer connection and send offer for the new user joining room
@@ -142,9 +143,9 @@ export function SquadRoom() {
     try {
       // create peer connection for the offer sender
       const pc = createPeerConnection(sender);
-      if (pc.iceConnectionState === 'connected') {
-        return;
-      }
+      // if (pc.iceConnectionState === 'connected') {
+      //   return;
+      // }
       await pc.setRemoteDescription(new RTCSessionDescription(offer));
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
@@ -168,9 +169,9 @@ export function SquadRoom() {
       //  acknowledge the answer
       const pc = peerConnections[sender];
       if (!pc) return;
-      if (pc.iceConnectionState === 'connected') {
-        return;
-      }
+      // if (pc.iceConnectionState === 'connected') {
+      //   return;
+      // }
       await pc.setRemoteDescription(new RTCSessionDescription(answer));
       console.log(`Client acknowledged answer from ${sender}`);
     } catch (error) {
@@ -264,6 +265,61 @@ export function SquadRoom() {
     setPeerConnections({});
   };
 
+  const replacePeerStream = async (stream: MediaStream) => {
+    Object.values(peerConnections).forEach((pc) => {
+      stream.getTracks().forEach((track) => {
+        const sender = pc
+          .getSenders()
+          .find((sender) => sender.track?.kind === track.kind);
+        sender?.replaceTrack(track);
+      });
+    });
+  };
+
+  const startScreenShare = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: true,
+      });
+
+      // Object.entries(peerConnections).forEach(async ([peerId, pc]) => {
+      //   const senders = pc.getSenders();
+      //   senders.forEach((sender) => {
+      //     console.log(sender);
+      //     pc.removeTrack(sender);
+      //   });
+      //   stream.getTracks().forEach((track) => {
+      //     console.log(track);
+      //     pc.addTrack(track, stream);
+      //   });
+
+      //   await createOffer(pc, peerId);
+      // });
+
+      replacePeerStream(stream);
+
+      // Update the local stream state
+      setLocalStream(stream);
+    } catch (e) {
+      console.error('Error sharing screen', e);
+    }
+  };
+
+  const stopScreenShare = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+      replacePeerStream(stream);
+
+      setLocalStream(stream);
+    } catch (e) {
+      console.error('Error sharing screen', e);
+    }
+  };
+
   return (
     <Stack align="center">
       <Title order={1}>Welcome to {room}!</Title>
@@ -297,6 +353,24 @@ export function SquadRoom() {
           Join Squad Call
         </Button>
       )}
+
+      <Button
+        onClick={startScreenShare}
+        size="lg"
+        radius="xl"
+        disabled={status === 'init'}
+      >
+        Share Screen
+      </Button>
+
+      <Button
+        onClick={stopScreenShare}
+        size="lg"
+        radius="xl"
+        disabled={status === 'init'}
+      >
+        Stop Screen Share
+      </Button>
     </Stack>
   );
 }
