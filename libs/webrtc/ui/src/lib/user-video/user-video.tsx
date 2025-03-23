@@ -68,7 +68,7 @@ export function UserVideo({
         }}
       />
       <Title order={5} mt="sm">
-        User: {userId}, {isSelf ? 'You' : ''}
+        User: {userId}
       </Title>
       <Group mt="md" justify="center">
         <Tooltip

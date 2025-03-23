@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from './squad-room.module.scss';
 import WebsocketService from '../services/websocket-service';
-import { Button, Card, Group, Stack, Title } from '@mantine/core';
+import { Button, Group, Stack, Title } from '@mantine/core';
 
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import UserVideo from '../user-video/user-video';
 
 export function SquadRoom() {
   const { room } = useParams(); // Get the room parameter from the URL
+  const [searchParams] = useSearchParams();
+
   const wsService = useRef<WebsocketService | null>(null);
 
   const [websocketConnected, setWebsocketConnected] = useState(false);
@@ -25,7 +27,8 @@ export function SquadRoom() {
   const userId = useRef<string>(null);
 
   if (!userId.current) {
-    userId.current = Math.random().toString(36).substring(2, 9);
+    userId.current =
+      searchParams.get('name') || Math.random().toString(36).substring(2, 9);
   }
 
   if (wsService.current === null) {
@@ -75,7 +78,7 @@ export function SquadRoom() {
 
   // room status
   useEffect(() => {
-    if (localStream && websocketConnected) {
+    if (localStream && websocketConnected && status === 'init') {
       setStatus('waiting');
     }
   }, [localStream, websocketConnected]);

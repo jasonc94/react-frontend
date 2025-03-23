@@ -17,9 +17,11 @@ import { notifications } from '@mantine/notifications';
 import { useNavigate } from 'react-router-dom';
 
 export function SquadLobby() {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isCreatingRoom, setIsCreatingRoom] = useState(false);
+  const [isEnteringRoom, setIsEnteringRoom] = useState<number | null>(null);
   const [newSquadName, setNewSquadName] = useState('');
   const [searchString, setSearchString] = useState('');
+  const [joinAsName, setJoinAsName] = useState('');
   const [squads, setSquads] = useState(['Alpha', 'Bravo', 'Charlie']);
   const navigate = useNavigate();
 
@@ -39,7 +41,7 @@ export function SquadLobby() {
       }
       setSquads([...squads, newSquadName]);
       setNewSquadName('');
-      setIsPopoverOpen(false);
+      setIsCreatingRoom(false);
     }
   };
 
@@ -49,13 +51,13 @@ export function SquadLobby() {
 
       <Flex justify={'center'}>
         <Popover
-          opened={isPopoverOpen}
-          onChange={setIsPopoverOpen}
+          opened={isCreatingRoom}
+          onChange={setIsCreatingRoom}
           position="bottom"
           withArrow
         >
           <Popover.Target>
-            <Button onClick={() => setIsPopoverOpen((o) => !o)}>
+            <Button onClick={() => setIsCreatingRoom((o) => !o)}>
               Create Squad Room
             </Button>
           </Popover.Target>
@@ -93,9 +95,40 @@ export function SquadLobby() {
             <Card key={index} shadow="sm" padding="lg" withBorder>
               <Group justify="space-between">
                 <Text>{squad}</Text>
-                <Button onClick={() => navigate(`/squad-connect/${squad}`)}>
+                {/* <Button onClick={() => navigate(`/squad-connect/${squad}`)}>
                   Enter Squad Room
-                </Button>
+                </Button> */}
+
+                <Popover
+                  opened={isEnteringRoom === index}
+                  onChange={(opened) => {
+                    setIsEnteringRoom(opened ? index : null);
+                  }}
+                  position="top"
+                  withArrow
+                >
+                  <Popover.Target>
+                    <Button onClick={() => setIsEnteringRoom(index)}>
+                      Enter Squad Room
+                    </Button>
+                  </Popover.Target>
+                  <Popover.Dropdown>
+                    <Stack>
+                      <Input
+                        placeholder="Join as: "
+                        value={joinAsName}
+                        onChange={(e) => setJoinAsName(e.target.value)}
+                      />
+                      <Button
+                        onClick={() =>
+                          navigate(`/squad-connect/${squad}?name=${joinAsName}`)
+                        }
+                      >
+                        Ok
+                      </Button>
+                    </Stack>
+                  </Popover.Dropdown>
+                </Popover>
               </Group>
             </Card>
           ))
