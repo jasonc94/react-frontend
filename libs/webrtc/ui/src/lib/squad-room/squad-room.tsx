@@ -101,9 +101,9 @@ export function SquadRoom() {
 
   // create peer connection and send offer for the new user joining room
   const handleJoin = async (peerId: string) => {
+    console.log(`${peerId} joined the room: `);
     const pc = createPeerConnection(peerId);
     await createOffer(pc, peerId);
-    console.log('Peer joined the room', peerId);
   };
 
   // cleanup peer connection when user leaves the room
@@ -119,7 +119,7 @@ export function SquadRoom() {
       delete copy[peerId];
       return copy;
     });
-    console.log('Peer left the room', peerId);
+    console.log(`${peerId} left the room: `);
   };
 
   const createOffer = async (pc: RTCPeerConnection, receiver?: string) => {
@@ -132,7 +132,7 @@ export function SquadRoom() {
         type: 'offer',
         payload: offer,
       });
-      console.log('Offer created');
+      console.log(`Client created offer for ${receiver}`);
     } catch (error) {
       console.error('Error creating offer:', error);
     }
@@ -154,7 +154,7 @@ export function SquadRoom() {
         type: 'answer',
         payload: answer,
       });
-      console.log('Offer handled, answer created');
+      console.log(`Client answered offer for ${sender}`);
     } catch (error) {
       console.error('Error creating answer:', error);
     }
@@ -172,7 +172,7 @@ export function SquadRoom() {
         return;
       }
       await pc.setRemoteDescription(new RTCSessionDescription(answer));
-      console.log('Answer Handled');
+      console.log(`Client acknowledged answer from ${sender}`);
     } catch (error) {
       console.error('Handle Answer - Error setting remote description:', error);
     }
@@ -210,11 +210,14 @@ export function SquadRoom() {
     });
 
     pc.oniceconnectionstatechange = () => {
-      console.log('ICE connection state:', pc.iceConnectionState);
+      console.log(
+        `${peerId} ICE connection state changed:`,
+        pc.iceConnectionState
+      );
     };
 
     pc.onicecandidate = (event) => {
-      console.log('New ICE candidateReceived');
+      // console.log('New ICE candidateReceived');
       if (event.candidate) {
         wsService.current?.send({
           sender: userId.current!,
