@@ -53,7 +53,7 @@ export function UserVideo({
       padding="lg"
       radius="md"
       withBorder
-      className={isSelf ? styles.self : ''}
+      className={isSelf ? styles.isMySelf : ''}
     >
       <video
         ref={videoRef}
@@ -68,7 +68,7 @@ export function UserVideo({
         }}
       />
       <Title order={5} mt="sm">
-        User: {userId}
+        User: {userId}, {isSelf ? 'You' : ''}
       </Title>
       <Group mt="md" justify="center">
         <Tooltip

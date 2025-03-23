@@ -2,6 +2,7 @@ type WebsocketMessage = {
   type: string;
   payload: unknown;
   sender: string;
+  receiver?: string;
 };
 
 type WebsocketCallback = {
@@ -37,7 +38,8 @@ class WebsocketService {
       const data: WebsocketMessage = JSON.parse(event.data);
       const type = data.type;
       const sender = data.sender;
-      console.log('WebSocket message received:', type, sender);
+      const receiver = data.receiver;
+      console.log('WebSocket message received:', type, sender, receiver);
       this.callbacks[type]?.(sender, data.payload);
     };
 

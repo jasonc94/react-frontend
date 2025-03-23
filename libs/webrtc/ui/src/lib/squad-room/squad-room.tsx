@@ -48,23 +48,32 @@ export function SquadRoom() {
       }
     };
     if (!localStream) {
+      console.log('Init local stream');
       initLocalStream();
     }
 
+    // Cleanup
+    return () => {
+      if (localStream) {
+        console.log('Cleanup local stream');
+        localStream?.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, [localStream]);
+
+  // websocket connection
+  useEffect(() => {
     wsService.current?.onOpen(() => {
       setWebsocketConnected(true);
     });
     wsService.current?.connect();
 
-    // Cleanup
     return () => {
-      if (localStream) {
-        localStream?.getTracks().forEach((track) => track.stop());
-      }
-      wsService.current?.disconnect();
+      return wsService.current?.disconnect();
     };
   }, []);
 
+  // room status
   useEffect(() => {
     if (localStream && websocketConnected) {
       setStatus('waiting');
@@ -73,20 +82,27 @@ export function SquadRoom() {
 
   // **important** - these callbacks needs to be reassigned when peerconnection changes
   useEffect(() => {
-    if (localStream && userId.current) {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    const noop = () => {};
+    if (localStream && userId.current && status === 'connected') {
       wsService.current?.on('join', handleJoin);
       wsService.current?.on('leave', handleLeave);
       wsService.current?.on('offer', handleOffer);
       wsService.current?.on('answer', handleAnswer);
       wsService.current?.on('icecandidate', handleIceCandidate);
+    } else {
+      wsService.current?.on('join', noop);
+      wsService.current?.on('leave', noop);
+      wsService.current?.on('offer', noop);
+      wsService.current?.on('answer', noop);
+      wsService.current?.on('icecandidate', noop);
     }
-  }, [peerConnections, localStream]);
+  }, [peerConnections, localStream, status]);
 
   // create peer connection and send offer for the new user joining room
   const handleJoin = async (peerId: string) => {
     const pc = createPeerConnection(peerId);
-    await createOffer(pc);
-    setStatus('connected');
+    await createOffer(pc, peerId);
     console.log('Peer joined the room', peerId);
   };
 
@@ -106,12 +122,13 @@ export function SquadRoom() {
     console.log('Peer left the room', peerId);
   };
 
-  const createOffer = async (pc: RTCPeerConnection) => {
+  const createOffer = async (pc: RTCPeerConnection, receiver?: string) => {
     try {
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
       wsService?.current?.send({
         sender: userId.current!,
+        receiver: receiver,
         type: 'offer',
         payload: offer,
       });
@@ -121,15 +138,19 @@ export function SquadRoom() {
     }
   };
 
-  const handleOffer = async (peerId: string, offer: RTCSessionDescription) => {
+  const handleOffer = async (sender: string, offer: RTCSessionDescription) => {
     try {
       // create peer connection for the offer sender
-      const pc = createPeerConnection(peerId);
+      const pc = createPeerConnection(sender);
+      if (pc.iceConnectionState === 'connected') {
+        return;
+      }
       await pc.setRemoteDescription(new RTCSessionDescription(offer));
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
       wsService?.current?.send({
         sender: userId.current!,
+        receiver: sender,
         type: 'answer',
         payload: answer,
       });
@@ -140,13 +161,16 @@ export function SquadRoom() {
   };
 
   const handleAnswer = async (
-    peerId: string,
+    sender: string,
     answer: RTCSessionDescription
   ) => {
     try {
       //  acknowledge the answer
-      const pc = peerConnections[peerId];
+      const pc = peerConnections[sender];
       if (!pc) return;
+      if (pc.iceConnectionState === 'connected') {
+        return;
+      }
       await pc.setRemoteDescription(new RTCSessionDescription(answer));
       console.log('Answer Handled');
     } catch (error) {
@@ -194,6 +218,7 @@ export function SquadRoom() {
       if (event.candidate) {
         wsService.current?.send({
           sender: userId.current!,
+          receiver: peerId,
           type: 'icecandidate',
           payload: event.candidate,
         });
@@ -232,6 +257,8 @@ export function SquadRoom() {
       payload: { type: 'leave', payload: { userId: userId.current } },
     });
     setStatus('waiting');
+    setPeerStreams({});
+    setPeerConnections({});
   };
 
   return (
