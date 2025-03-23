@@ -11,9 +11,11 @@ import {
 export function UserVideo({
   mediaStream,
   userId,
+  isSelf = false,
 }: {
   mediaStream: MediaStream | null;
   userId: string;
+  isSelf?: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isVideoOn, setIsVideoOn] = useState(true);
@@ -46,7 +48,13 @@ export function UserVideo({
   };
 
   return (
-    <Card shadow="sm" padding="lg" radius="md" withBorder>
+    <Card
+      shadow="sm"
+      padding="lg"
+      radius="md"
+      withBorder
+      className={isSelf ? styles.self : ''}
+    >
       <video
         ref={videoRef}
         autoPlay

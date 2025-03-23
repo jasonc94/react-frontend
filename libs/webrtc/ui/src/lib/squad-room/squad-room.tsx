@@ -86,6 +86,7 @@ export function SquadRoom() {
   const handleJoin = async (peerId: string) => {
     const pc = createPeerConnection(peerId);
     await createOffer(pc);
+    setStatus('connected');
     console.log('Peer joined the room', peerId);
   };
 
@@ -241,6 +242,7 @@ export function SquadRoom() {
         <UserVideo
           mediaStream={localStream}
           userId={userId.current!}
+          isSelf={true}
         ></UserVideo>
 
         {Object.keys(peerStreams).map((peerId) => (
