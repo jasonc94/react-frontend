@@ -269,61 +269,6 @@ export function SquadRoom() {
     setPeerConnections({});
   };
 
-  const replacePeerStream = async (stream: MediaStream) => {
-    Object.values(peerConnections).forEach((pc) => {
-      stream.getTracks().forEach((track) => {
-        const sender = pc
-          .getSenders()
-          .find((sender) => sender.track?.kind === track.kind);
-        sender?.replaceTrack(track);
-      });
-    });
-  };
-
-  const startScreenShare = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
-        audio: true,
-      });
-
-      // Object.entries(peerConnections).forEach(async ([peerId, pc]) => {
-      //   const senders = pc.getSenders();
-      //   senders.forEach((sender) => {
-      //     console.log(sender);
-      //     pc.removeTrack(sender);
-      //   });
-      //   stream.getTracks().forEach((track) => {
-      //     console.log(track);
-      //     pc.addTrack(track, stream);
-      //   });
-
-      //   await createOffer(pc, peerId);
-      // });
-
-      replacePeerStream(stream);
-
-      // Update the local stream state
-      setLocalStream(stream);
-    } catch (e) {
-      console.error('Error sharing screen', e);
-    }
-  };
-
-  const stopScreenShare = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
-      });
-      replacePeerStream(stream);
-
-      setLocalStream(stream);
-    } catch (e) {
-      console.error('Error sharing screen', e);
-    }
-  };
-
   return (
     <Flex direction={'column'} gap="md" className="flexFill">
       <Title order={1}>Welcome to {room}!</Title>
@@ -350,46 +295,13 @@ export function SquadRoom() {
         ))}
       </Flex>
 
-      {/* <Flex justify={'center'} gap={'md'}>
-        {status === 'connected' ? (
-          <Button onClick={leaveSquadCall} size="lg" radius="xl">
-            Leave
-          </Button>
-        ) : (
-          <Button
-            onClick={joinSquadCall}
-            size="lg"
-            radius="xl"
-            disabled={status === 'init'}
-          >
-            Join Squad Call
-          </Button>
-        )}
-
-        <Button
-          onClick={startScreenShare}
-          size="lg"
-          radius="xl"
-          disabled={status === 'init'}
-        >
-          Share Screen
-        </Button>
-
-        <Button
-          onClick={stopScreenShare}
-          size="lg"
-          radius="xl"
-          disabled={status === 'init'}
-        >
-          Stop Screen Share
-        </Button>
-      </Flex> */}
       <RoomControls
         roomStatus={status}
+        mediaStream={localStream}
+        peerConnections={peerConnections}
         onJoinSquadCall={joinSquadCall}
         onLeaveSquadCall={leaveSquadCall}
-        onStartScreenShare={startScreenShare}
-        onStopScreenShare={stopScreenShare}
+        onLocalStreamUpdate={setLocalStream}
       ></RoomControls>
     </Flex>
   );
