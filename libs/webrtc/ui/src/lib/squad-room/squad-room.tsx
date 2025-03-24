@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from './squad-room.module.scss';
 import WebsocketService from '../services/websocket-service';
-import { Button, Flex, Title } from '@mantine/core';
+import { Button, Center, Flex, Title } from '@mantine/core';
 
 import { useParams, useSearchParams } from 'react-router-dom';
 import UserVideo from '../user-video/user-video';
+import RoomControls from '../room-controls/room-controls';
 
 export function SquadRoom() {
   const { room } = useParams(); // Get the room parameter from the URL
@@ -324,7 +325,7 @@ export function SquadRoom() {
   };
 
   return (
-    <Flex direction={'column'} className="flexFill">
+    <Flex direction={'column'} gap="md" className="flexFill">
       <Title order={1}>Welcome to {room}!</Title>
 
       <Flex
@@ -349,38 +350,47 @@ export function SquadRoom() {
         ))}
       </Flex>
 
-      {status === 'connected' ? (
-        <Button onClick={leaveSquadCall} size="lg" radius="xl">
-          Leave
-        </Button>
-      ) : (
+      {/* <Flex justify={'center'} gap={'md'}>
+        {status === 'connected' ? (
+          <Button onClick={leaveSquadCall} size="lg" radius="xl">
+            Leave
+          </Button>
+        ) : (
+          <Button
+            onClick={joinSquadCall}
+            size="lg"
+            radius="xl"
+            disabled={status === 'init'}
+          >
+            Join Squad Call
+          </Button>
+        )}
+
         <Button
-          onClick={joinSquadCall}
+          onClick={startScreenShare}
           size="lg"
           radius="xl"
           disabled={status === 'init'}
         >
-          Join Squad Call
+          Share Screen
         </Button>
-      )}
 
-      <Button
-        onClick={startScreenShare}
-        size="lg"
-        radius="xl"
-        disabled={status === 'init'}
-      >
-        Share Screen
-      </Button>
-
-      <Button
-        onClick={stopScreenShare}
-        size="lg"
-        radius="xl"
-        disabled={status === 'init'}
-      >
-        Stop Screen Share
-      </Button>
+        <Button
+          onClick={stopScreenShare}
+          size="lg"
+          radius="xl"
+          disabled={status === 'init'}
+        >
+          Stop Screen Share
+        </Button>
+      </Flex> */}
+      <RoomControls
+        roomStatus={status}
+        onJoinSquadCall={joinSquadCall}
+        onLeaveSquadCall={leaveSquadCall}
+        onStartScreenShare={startScreenShare}
+        onStopScreenShare={stopScreenShare}
+      ></RoomControls>
     </Flex>
   );
 }
