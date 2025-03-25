@@ -20,14 +20,14 @@ import { useState } from 'react';
 
 export function RoomControls({
   roomStatus,
-  mediaStream,
+  localStream,
   peerConnections,
   onJoinSquadCall,
   onLeaveSquadCall,
   onLocalStreamUpdate,
 }: {
   roomStatus: string;
-  mediaStream: MediaStream | null;
+  localStream: MediaStream | null;
   peerConnections: { [peerId: string]: RTCPeerConnection };
   onJoinSquadCall: () => void;
   onLeaveSquadCall: () => void;
@@ -38,16 +38,16 @@ export function RoomControls({
   const [isScreenShareOn, setIsScreenShareOn] = useState(false);
 
   const toggleVideoOrAudio = (type: 'video' | 'audio') => {
-    if (mediaStream) {
+    if (localStream) {
       switch (type) {
         case 'video':
-          mediaStream
+          localStream
             .getVideoTracks()
             .forEach((track) => (track.enabled = !track.enabled));
           setIsVideoOn((prev) => !prev);
           break;
         case 'audio':
-          mediaStream
+          localStream
             .getAudioTracks()
             .forEach((track) => (track.enabled = !track.enabled));
           setIsAudioOn((prev) => !prev);
@@ -57,7 +57,7 @@ export function RoomControls({
   };
 
   const toggleScreenShare = () => {
-    if (mediaStream) {
+    if (localStream) {
       isScreenShareOn ? stopScreenShare() : startScreenShare();
       setIsScreenShareOn((prev) => !prev);
     }
@@ -81,6 +81,11 @@ export function RoomControls({
         audio: true,
       });
 
+      stream.getVideoTracks()[0].addEventListener('ended', () => {
+        console.log('Screen sharing ended by user');
+        stopScreenShare();
+      });
+
       replacePeerStream(stream);
 
       // Update the local stream state
@@ -93,6 +98,7 @@ export function RoomControls({
 
   const stopScreenShare = async () => {
     try {
+      localStream?.getTracks().forEach((track) => track.stop());
       const stream = await navigator.mediaDevices.getUserMedia({
         video: true,
         audio: true,

@@ -303,7 +303,7 @@ export function SquadRoom() {
 
       <RoomControls
         roomStatus={status}
-        mediaStream={localStream}
+        localStream={localStream}
         peerConnections={peerConnections}
         onJoinSquadCall={joinSquadCall}
         onLeaveSquadCall={leaveSquadCall}
