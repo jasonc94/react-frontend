@@ -21,13 +21,8 @@ export function SquadRoom() {
       stream: MediaStream | null;
     };
   }>({});
-  // const [peerConnections, setPeerConnections] = useState<{
-  //   [senderId: string]: RTCPeerConnection;
-  // }>({});
+
   const [status, setStatus] = useState<'init' | 'ready' | 'connected'>('init');
-  // const [peerStreams, setPeerStreams] = useState<{
-  //   [senderId: string]: MediaStream;
-  // }>({});
 
   const userId = useRef<string>(null);
 
@@ -278,7 +273,7 @@ export function SquadRoom() {
   };
 
   return (
-    <Flex direction={'column'} gap="md" className="flexFill">
+    <Flex direction={'column'} gap="md" className="flex">
       <Title order={1}>Welcome to {room}!</Title>
 
       {status === 'ready' && (
@@ -292,7 +287,7 @@ export function SquadRoom() {
         wrap={'wrap'}
         justify={'center'}
         align={'stretch'}
-        className="flexFill"
+        className="flex"
       >
         <UserVideo
           mediaStream={localStream}

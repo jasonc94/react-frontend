@@ -5,6 +5,13 @@
   @return math.div($px, 16px) * 1rem; // Directly return the value in rem
 }
 
-.flexFill {
+.flex {
   flex: 1 1 0;
+}
+
+.flexFill {
+  max-width: 100%;
+  max-height: 100%;
+  min-width: 100%;
+  min-height: 100%;
 }

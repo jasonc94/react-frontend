@@ -4,6 +4,7 @@ import {
   Center,
   Flex,
   Group,
+  Stack,
   Tooltip,
 } from '@mantine/core';
 import styles from './room-controls.module.scss';
@@ -16,7 +17,7 @@ import {
   IconVideo,
   IconVideoOff,
 } from '@tabler/icons-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export function RoomControls({
   roomStatus,
@@ -42,19 +43,29 @@ export function RoomControls({
   const [isAudioOn, setIsAudioOn] = useState(true);
   const [isScreenShareOn, setIsScreenShareOn] = useState(false);
 
+  useEffect(() => {
+    if (localStream) {
+      localStream
+        .getVideoTracks()
+        .forEach((track) => (track.enabled = isVideoOn));
+    }
+  }, [isVideoOn, localStream]);
+
+  useEffect(() => {
+    if (localStream) {
+      localStream
+        .getAudioTracks()
+        .forEach((track) => (track.enabled = isAudioOn));
+    }
+  }, [isAudioOn, localStream]);
+
   const toggleVideoOrAudio = (type: 'video' | 'audio') => {
     if (localStream) {
       switch (type) {
         case 'video':
-          localStream
-            .getVideoTracks()
-            .forEach((track) => (track.enabled = !track.enabled));
           setIsVideoOn((prev) => !prev);
           break;
         case 'audio':
-          localStream
-            .getAudioTracks()
-            .forEach((track) => (track.enabled = !track.enabled));
           setIsAudioOn((prev) => !prev);
           break;
       }
@@ -185,7 +196,39 @@ export function RoomControls({
   }
 
   return (
-    <Center>
+    <Flex direction={'column'} gap={'md'}>
+      <Flex justify={'center'} gap={'md'}>
+        <Tooltip
+          label={isVideoOn ? 'Turn Off Video' : 'Turn On Video'}
+          withArrow
+        >
+          <ActionIcon
+            size="xl"
+            radius="xl"
+            variant="filled"
+            color={isVideoOn ? undefined : 'red'}
+            onClick={() => toggleVideoOrAudio('video')}
+          >
+            {isVideoOn ? <IconVideo size={24} /> : <IconVideoOff size={24} />}
+          </ActionIcon>
+        </Tooltip>
+        <Tooltip label={isAudioOn ? 'Mute' : 'Unmute'} withArrow>
+          <ActionIcon
+            size="xl"
+            radius="xl"
+            variant="filled"
+            color={isAudioOn ? undefined : 'red'}
+            onClick={() => toggleVideoOrAudio('audio')}
+          >
+            {isAudioOn ? (
+              <IconMicrophone size={24} />
+            ) : (
+              <IconMicrophoneOff size={24} />
+            )}
+          </ActionIcon>
+        </Tooltip>
+      </Flex>
+
       <Button
         onClick={onJoinSquadCall}
         size="lg"
@@ -194,7 +237,7 @@ export function RoomControls({
       >
         Join Squad Call
       </Button>
-    </Center>
+    </Flex>
   );
 }
 
