@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from './squad-room.module.scss';
 import WebsocketService from '../services/websocket-service';
-import { Button, Center, Flex, Title } from '@mantine/core';
+import { Button, Center, Flex, Grid, Title } from '@mantine/core';
 
 import { useParams, useSearchParams } from 'react-router-dom';
 import UserVideo from '../user-video/user-video';
@@ -272,6 +272,33 @@ export function SquadRoom() {
     setPeers({});
   };
 
+  const getColSpan = (index: number) => {
+    const totalLength = Object.keys(peers).length + 1;
+    switch (true) {
+      case totalLength < 4:
+        return 12 / totalLength;
+      case totalLength === 4:
+        return 6;
+      case totalLength === 5:
+        if (index < 2) {
+          return 6;
+        } else {
+          return 4;
+        }
+      case totalLength === 6:
+        return 4;
+      case totalLength === 7:
+        if (index < 3) {
+          return 4;
+        }
+        return 3;
+      case totalLength === 8:
+        return 3;
+      default:
+        return 3;
+    }
+  };
+
   return (
     <Flex direction={'column'} gap="md" className="flex">
       <Title order={1}>Welcome to {room}!</Title>
@@ -282,7 +309,7 @@ export function SquadRoom() {
         </Center>
       )}
 
-      <Flex
+      {/* <Flex
         gap="md"
         wrap={'wrap'}
         justify={'center'}
@@ -302,7 +329,25 @@ export function SquadRoom() {
             userId={peerId}
           ></UserVideo>
         ))}
-      </Flex>
+      </Flex> */}
+
+      <Grid className="flex">
+        <Grid.Col span={getColSpan(0)} className="flex">
+          <UserVideo
+            mediaStream={localStream}
+            userId={userId.current!}
+            isSelf={true}
+          />
+        </Grid.Col>
+        {Object.keys(peers).map((peerId, index) => (
+          <Grid.Col key={peerId} span={getColSpan(index + 1)} className="flex">
+            <UserVideo
+              mediaStream={peers[peerId].stream}
+              userId={peerId}
+            ></UserVideo>
+          </Grid.Col>
+        ))}
+      </Grid>
 
       <RoomControls
         roomStatus={status}
