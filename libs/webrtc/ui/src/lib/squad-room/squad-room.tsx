@@ -15,13 +15,19 @@ export function SquadRoom() {
 
   const [websocketConnected, setWebsocketConnected] = useState(false);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
-  const [peerConnections, setPeerConnections] = useState<{
-    [senderId: string]: RTCPeerConnection;
+  const [peers, setPeers] = useState<{
+    [senderId: string]: {
+      peerConnection: RTCPeerConnection;
+      stream: MediaStream | null;
+    };
   }>({});
+  // const [peerConnections, setPeerConnections] = useState<{
+  //   [senderId: string]: RTCPeerConnection;
+  // }>({});
   const [status, setStatus] = useState<'init' | 'ready' | 'connected'>('init');
-  const [peerStreams, setPeerStreams] = useState<{
-    [senderId: string]: MediaStream;
-  }>({});
+  // const [peerStreams, setPeerStreams] = useState<{
+  //   [senderId: string]: MediaStream;
+  // }>({});
 
   const userId = useRef<string>(null);
 
@@ -93,7 +99,7 @@ export function SquadRoom() {
     } else {
       wsService.current?.resetOnCallbacks();
     }
-  }, [peerConnections, localStream, status]);
+  }, [peers, localStream, status]);
 
   // create peer connection and send offer for the new user joining room
   const handleJoin = async (peerId: string) => {
@@ -104,17 +110,17 @@ export function SquadRoom() {
 
   // cleanup peer connection when user leaves the room
   const handleLeave = async (peerId: string) => {
-    peerConnections[peerId]?.close();
-    setPeerConnections((prev) => {
+    peers[peerId]?.peerConnection?.close();
+    setPeers((prev) => {
       const copy = { ...prev };
       delete copy[peerId];
       return copy;
     });
-    setPeerStreams((prev) => {
-      const copy = { ...prev };
-      delete copy[peerId];
-      return copy;
-    });
+    // setPeerStreams((prev) => {
+    //   const copy = { ...prev };
+    //   delete copy[peerId];
+    //   return copy;
+    // });
     console.log(`${peerId} left the room: `);
   };
 
@@ -162,7 +168,7 @@ export function SquadRoom() {
   ) => {
     try {
       //  acknowledge the answer
-      const pc = peerConnections[sender];
+      const pc = peers[sender]?.peerConnection;
       if (!pc) return;
       // if (pc.iceConnectionState === 'connected') {
       //   return;
@@ -179,7 +185,7 @@ export function SquadRoom() {
     candidate: RTCIceCandidate
   ) => {
     try {
-      const pc = peerConnections[sender];
+      const pc = peers[sender]?.peerConnection;
       if (!pc) return;
       await pc.addIceCandidate(candidate);
     } catch (e) {
@@ -188,7 +194,7 @@ export function SquadRoom() {
   };
 
   const createPeerConnection = (peerId: string) => {
-    if (peerConnections[peerId]) return peerConnections[peerId];
+    if (peers[peerId]?.peerConnection) return peers[peerId]?.peerConnection;
 
     const pc = new RTCPeerConnection({
       iceServers: [
@@ -226,7 +232,10 @@ export function SquadRoom() {
 
     pc.ontrack = (event) => {
       const stream = event.streams[0];
-      setPeerStreams((prev) => ({ ...prev, [peerId]: stream }));
+      setPeers((prev) => ({
+        ...prev,
+        [peerId]: { peerConnection: pc, stream },
+      }));
     };
 
     if (localStream) {
@@ -235,7 +244,10 @@ export function SquadRoom() {
         .forEach((track) => pc.addTrack(track, localStream));
     }
 
-    setPeerConnections((prev) => ({ ...prev, [peerId]: pc }));
+    setPeers((prev) => ({
+      ...prev,
+      [peerId]: { peerConnection: pc, stream: null },
+    }));
     console.log('Peer connection created', peerId);
     return pc;
   };
@@ -256,8 +268,13 @@ export function SquadRoom() {
       payload: { type: 'leave', payload: { userId: userId.current } },
     });
     setStatus('ready');
-    setPeerStreams({});
-    setPeerConnections({});
+    // setPeerStreams({});
+    // setPeerConnections({});
+    Object.entries(peers).forEach(([peerId, peer]) => {
+      peer.peerConnection.close();
+      peer.stream?.getTracks().forEach((track) => track.stop());
+    });
+    setPeers({});
   };
 
   return (
@@ -283,10 +300,10 @@ export function SquadRoom() {
           isSelf={true}
         />
 
-        {Object.keys(peerStreams).map((peerId) => (
+        {Object.entries(peers).map(([peerId, { stream }]) => (
           <UserVideo
             key={peerId}
-            mediaStream={peerStreams[peerId]}
+            mediaStream={stream}
             userId={peerId}
           ></UserVideo>
         ))}
@@ -295,7 +312,7 @@ export function SquadRoom() {
       <RoomControls
         roomStatus={status}
         localStream={localStream}
-        peerConnections={peerConnections}
+        peerConnections={peers}
         onJoinSquadCall={joinSquadCall}
         onLeaveSquadCall={leaveSquadCall}
         onLocalStreamUpdate={setLocalStream}

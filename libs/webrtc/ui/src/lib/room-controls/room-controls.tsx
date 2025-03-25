@@ -28,7 +28,12 @@ export function RoomControls({
 }: {
   roomStatus: string;
   localStream: MediaStream | null;
-  peerConnections: { [peerId: string]: RTCPeerConnection };
+  peerConnections: {
+    [peerId: string]: {
+      peerConnection: RTCPeerConnection;
+      stream: MediaStream | null;
+    };
+  };
   onJoinSquadCall: () => void;
   onLeaveSquadCall: () => void;
   onLocalStreamUpdate: (stream: MediaStream) => void;
@@ -64,7 +69,7 @@ export function RoomControls({
   };
 
   const replacePeerStream = async (stream: MediaStream) => {
-    Object.values(peerConnections).forEach((pc) => {
+    Object.values(peerConnections).forEach(({ peerConnection: pc }) => {
       stream.getTracks().forEach((track) => {
         const sender = pc
           .getSenders()
