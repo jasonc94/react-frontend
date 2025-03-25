@@ -273,6 +273,12 @@ export function SquadRoom() {
     <Flex direction={'column'} gap="md" className="flexFill">
       <Title order={1}>Welcome to {room}!</Title>
 
+      {status === 'waiting' && (
+        <Center>
+          <Title order={2}>Waiting Area... Click to Join</Title>
+        </Center>
+      )}
+
       <Flex
         gap="md"
         wrap={'wrap'}

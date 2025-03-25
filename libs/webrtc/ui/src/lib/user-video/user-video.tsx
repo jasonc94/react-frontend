@@ -1,4 +1,4 @@
-import { AspectRatio, Card, Title } from '@mantine/core';
+import { AspectRatio, Text, Overlay } from '@mantine/core';
 import styles from './user-video.module.scss';
 import { useEffect, useRef, useState } from 'react';
 
@@ -38,32 +38,34 @@ export function UserVideo({
   }, []);
 
   return (
-    <AspectRatio ratio={aspectRatio}>
-      <Card
-        shadow="sm"
-        padding="lg"
-        radius="md"
-        withBorder
-        style={{ width: '100%', height: '100%' }}
-        className={isSelf ? styles.isMySelf : ''}
-      >
+    <AspectRatio ratio={aspectRatio} mx="auto">
+      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         <video
           ref={videoRef}
           autoPlay
           muted
           playsInline
           style={{
-            minWidth: '500px',
+            minWidth: '600px',
             height: '100%',
             maxWidth: '100%',
             borderRadius: '8px',
             backgroundColor: '#000',
           }}
         />
-        <Title order={5} mt="sm">
+        <Text
+          style={{
+            position: 'absolute',
+            bottom: '10px',
+            left: '10px',
+            color: 'white',
+            fontWeight: 'bold',
+            zIndex: 2,
+          }}
+        >
           User: {userId}
-        </Title>
-      </Card>
+        </Text>
+      </div>
     </AspectRatio>
   );
 }
