@@ -93,6 +93,7 @@ export function RoomControls({
       setIsScreenShareOn(true);
     } catch (e) {
       console.error('Error sharing screen', e);
+      setIsScreenShareOn(false);
     }
   };
 

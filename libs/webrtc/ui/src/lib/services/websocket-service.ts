@@ -53,6 +53,10 @@ class WebsocketService {
     this.callbacks[type] = callBack;
   }
 
+  resetOnCallbacks() {
+    this.callbacks = {};
+  }
+
   onOpen(callBack: () => void) {
     this.eventCallbacks.onOpen = callBack;
   }

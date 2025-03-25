@@ -18,9 +18,7 @@ export function SquadRoom() {
   const [peerConnections, setPeerConnections] = useState<{
     [senderId: string]: RTCPeerConnection;
   }>({});
-  const [status, setStatus] = useState<'init' | 'waiting' | 'connected'>(
-    'init'
-  );
+  const [status, setStatus] = useState<'init' | 'ready' | 'connected'>('init');
   const [peerStreams, setPeerStreams] = useState<{
     [senderId: string]: MediaStream;
   }>({});
@@ -73,35 +71,28 @@ export function SquadRoom() {
     wsService.current?.connect();
 
     return () => {
-      return wsService.current?.disconnect();
+      wsService.current?.disconnect();
     };
   }, []);
 
   // room status
   useEffect(() => {
     if (localStream && websocketConnected && status === 'init') {
-      setStatus('waiting');
+      setStatus('ready');
     }
   }, [localStream, websocketConnected]);
 
   // **important** - these callbacks needs to be reassigned when peerconnection changes
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    const noop = () => {};
     if (localStream && userId.current && status === 'connected') {
       wsService.current?.on('join', handleJoin);
       wsService.current?.on('leave', handleLeave);
       wsService.current?.on('offer', handleOffer);
       wsService.current?.on('answer', handleAnswer);
       wsService.current?.on('icecandidate', handleIceCandidate);
+    } else {
+      wsService.current?.resetOnCallbacks();
     }
-    // else {
-    //   wsService.current?.on('join', noop);
-    //   wsService.current?.on('leave', noop);
-    //   wsService.current?.on('offer', noop);
-    //   wsService.current?.on('answer', noop);
-    //   wsService.current?.on('icecandidate', noop);
-    // }
   }, [peerConnections, localStream, status]);
 
   // create peer connection and send offer for the new user joining room
@@ -264,7 +255,7 @@ export function SquadRoom() {
       type: 'leave',
       payload: { type: 'leave', payload: { userId: userId.current } },
     });
-    setStatus('waiting');
+    setStatus('ready');
     setPeerStreams({});
     setPeerConnections({});
   };
@@ -273,7 +264,7 @@ export function SquadRoom() {
     <Flex direction={'column'} gap="md" className="flexFill">
       <Title order={1}>Welcome to {room}!</Title>
 
-      {status === 'waiting' && (
+      {status === 'ready' && (
         <Center>
           <Title order={2}>Waiting Area... Click to Join</Title>
         </Center>

@@ -1,4 +1,4 @@
-import { AspectRatio, Text, Overlay } from '@mantine/core';
+import { AspectRatio, Text, Overlay, Flex } from '@mantine/core';
 import styles from './user-video.module.scss';
 import { useEffect, useRef, useState } from 'react';
 
@@ -39,7 +39,10 @@ export function UserVideo({
 
   return (
     <AspectRatio ratio={aspectRatio} mx="auto">
-      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      <Flex
+        justify="center"
+        style={{ position: 'relative', width: '100%', height: '100%' }}
+      >
         <video
           ref={videoRef}
           autoPlay
@@ -65,7 +68,7 @@ export function UserVideo({
         >
           User: {userId}
         </Text>
-      </div>
+      </Flex>
     </AspectRatio>
   );
 }
