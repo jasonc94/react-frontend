@@ -295,7 +295,7 @@ export function SquadRoom() {
       case totalLength === 8:
         return 3;
       default:
-        return 3;
+        return 4;
     }
   };
 

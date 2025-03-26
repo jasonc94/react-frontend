@@ -38,7 +38,11 @@ export function UserVideo({
   }, []);
 
   return (
-    <AspectRatio ratio={aspectRatio} mx="auto" style={{ display: 'flex' }}>
+    <AspectRatio
+      ratio={aspectRatio}
+      mx="auto"
+      style={{ display: 'flex', position: 'relative' }}
+    >
       <video
         ref={videoRef}
         autoPlay

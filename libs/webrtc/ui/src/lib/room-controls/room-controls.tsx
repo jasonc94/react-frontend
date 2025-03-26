@@ -39,7 +39,7 @@ export function RoomControls({
   onLeaveSquadCall: () => void;
   onLocalStreamUpdate: (stream: MediaStream) => void;
 }) {
-  const [isVideoOn, setIsVideoOn] = useState(true);
+  const [isVideoOn, setIsVideoOn] = useState(false);
   const [isAudioOn, setIsAudioOn] = useState(true);
   const [isScreenShareOn, setIsScreenShareOn] = useState(false);
 
