@@ -130,7 +130,7 @@ export function RoomControls({
 
   if (roomStatus === 'connected') {
     return (
-      <Flex justify={'center'} gap={'md'}>
+      <Flex justify={'center'} gap={'md'} className={styles.container}>
         <Tooltip
           label={isVideoOn ? 'Turn Off Video' : 'Turn On Video'}
           withArrow
@@ -196,7 +196,7 @@ export function RoomControls({
   }
 
   return (
-    <Flex direction={'column'} gap={'md'}>
+    <Flex direction={'column'} gap={'md'} className={styles.container}>
       <Flex justify={'center'} gap={'md'}>
         <Tooltip
           label={isVideoOn ? 'Turn Off Video' : 'Turn On Video'}

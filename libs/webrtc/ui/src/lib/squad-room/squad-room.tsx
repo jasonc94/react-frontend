@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import styles from './squad-room.module.scss';
 import WebsocketService from '../services/websocket-service';
 import { Button, Center, Flex, Grid, Title } from '@mantine/core';
-
 import { useParams, useSearchParams } from 'react-router-dom';
 import UserVideo from '../user-video/user-video';
 import RoomControls from '../room-controls/room-controls';
@@ -317,7 +316,12 @@ export function SquadRoom() {
   };
 
   return (
-    <Flex direction={'column'} gap="md" className="flex">
+    <Flex
+      direction={'column'}
+      gap="md"
+      className="flex"
+      style={{ position: 'relative' }}
+    >
       <Title order={1}>Welcome to {room}!</Title>
 
       {status === 'ready' && (
