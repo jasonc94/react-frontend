@@ -39,20 +39,35 @@ export function SquadRoom() {
 
   useEffect(() => {
     // Local Video Feed
-    const initLocalStream = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
+    const getOptimizedStream = async () => {
+      const constraints = [
+        {
+          video: {
+            width: { min: 640, ideal: 1920, max: 1920 },
+            height: { min: 480, ideal: 1080, max: 1080 },
+          },
+          audio: true,
+        },
+        {
           video: true,
           audio: true,
-        });
-        setLocalStream(stream);
-      } catch (error) {
-        console.error('Error accessing media devices:', error);
+        },
+      ];
+
+      for (const config of constraints) {
+        try {
+          console.log('Trying to get user media with constraints', config);
+          const stream = await navigator.mediaDevices.getUserMedia(config);
+          setLocalStream(stream);
+          break;
+        } catch (err) {
+          console.warn(`Failed to get user media with constraints`, err);
+        }
       }
     };
     if (!localStream) {
       console.log('Init local stream');
-      initLocalStream();
+      getOptimizedStream();
     }
 
     // Cleanup
@@ -168,8 +183,10 @@ export function SquadRoom() {
       // if (pc.iceConnectionState === 'connected') {
       //   return;
       // }
-      await pc.setRemoteDescription(new RTCSessionDescription(answer));
-      console.log(`Client acknowledged answer from ${sender}`);
+      if (!pc.currentRemoteDescription) {
+        await pc.setRemoteDescription(new RTCSessionDescription(answer));
+        console.log(`Client acknowledged answer from ${sender}`);
+      }
     } catch (error) {
       console.error('Handle Answer - Error setting remote description:', error);
     }

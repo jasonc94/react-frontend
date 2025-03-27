@@ -16,9 +16,9 @@ export function App() {
   return (
     <MantineProvider>
       <Notifications />
-      <EnvironmentContext.Provider value={environment}>
+      <EnvironmentContext value={environment}>
         <AppMainShell />
-      </EnvironmentContext.Provider>
+      </EnvironmentContext>
     </MantineProvider>
   );
 }
