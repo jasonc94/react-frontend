@@ -5,6 +5,10 @@ cache:
     - 'node_modules/**/*'
     - ~/.npm/**/*
 
+env:
+  variables:
+    S3_BUCKET: 'TO-Be-Defined-By-AWSCodeBuild'
+
 phases:
   install:
     runtime-versions:
@@ -20,3 +24,5 @@ phases:
   post_build:
     commands:
       - echo Build completed!!
+      - echo Uploading files to S3...
+      - aws s3 sync ./dist/react-web-app s3://$S3_BUCKET --delete
