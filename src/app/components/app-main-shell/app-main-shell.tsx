@@ -11,10 +11,16 @@ import { useDisclosure } from '@mantine/hooks';
 import SideNav from '../side-nav/side-nav';
 import AppRouting from '../app-routing/app-routing';
 import classes from './app-main-shell.module.scss';
+import { useEffect } from 'react';
 
 export function AppMainShell() {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
+
+  // default to dark
+  useEffect(() => {
+    setColorScheme('dark');
+  }, []);
 
   // -> colorScheme is 'auto' | 'light' | 'dark'
   const { setColorScheme } = useMantineColorScheme();
