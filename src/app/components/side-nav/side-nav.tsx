@@ -33,6 +33,9 @@ export default function SideNav({ closeNav }: { closeNav: () => void }) {
       to={item.link}
       key={item.label}
       onClick={() => {
+        console.log('window', window.innerWidth);
+        console.log('document', document.documentElement.clientWidth);
+
         const isMobile = window.innerWidth <= 768;
         if (isMobile) {
           closeNav();
