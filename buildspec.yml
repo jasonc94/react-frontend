@@ -12,7 +12,7 @@ phases:
     commands:
       # - rm -rf node_modules package-lock.json
       - echo Installing dependencies...
-      - npm install --no-optional
+      - npm install --omit=optional
   build:
     commands:
       - echo Building the project...
