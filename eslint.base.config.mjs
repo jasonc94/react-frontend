@@ -18,6 +18,15 @@ export default [
           depConstraints: [
             {
               sourceTag: 'app',
+              onlyDependOnLibsWithTags: [
+                'feature',
+                'data-access',
+                'ui',
+                'util',
+              ],
+            },
+            {
+              sourceTag: 'feature',
               onlyDependOnLibsWithTags: ['data-access', 'ui', 'util'],
             },
             {

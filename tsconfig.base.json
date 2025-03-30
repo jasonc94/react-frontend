@@ -16,6 +16,9 @@
     "baseUrl": ".",
     "paths": {
       "@JC/games/game-2048": ["libs/games/game-2048/src/index.ts"],
+      "@JC/games/game-arrow-apocalypse": [
+        "libs/games/game-arrow-apocalypse/src/index.ts"
+      ],
       "@JC/home": ["libs/home/ui/src/index.ts"],
       "@JC/models": ["libs/models/src/index.ts"],
       "@JC/resume": ["libs/resume/src/index.ts"],
