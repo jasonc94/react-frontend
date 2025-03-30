@@ -81,6 +81,7 @@ export function RoomControls({
 
   const replacePeerStream = async (stream: MediaStream) => {
     Object.values(peerConnections).forEach(({ peerConnection: pc }) => {
+      if (pc.signalingState === 'closed') return;
       stream.getTracks().forEach((track) => {
         const sender = pc
           .getSenders()

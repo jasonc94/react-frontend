@@ -11,7 +11,7 @@ import {
 } from '@tabler/icons-react';
 import classes from './side-nav.module.scss';
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 const data = [
   { link: '/', label: 'Home', icon: IconHome },
@@ -26,34 +26,39 @@ const data = [
 export default function SideNav({ closeNav }: { closeNav: () => void }) {
   const [active, setActive] = useState('Billing');
 
-  const links = data.map((item) => (
-    <Link
-      className={classes.link}
-      data-active={item.label === active || undefined}
-      to={item.link}
-      key={item.label}
-      onClick={() => {
-        console.log('window', window.innerWidth);
-        console.log('document', document.documentElement.clientWidth);
+  const onLinkClick = useCallback(
+    (label: string) => {
+      console.log('window', window.innerWidth);
+      console.log('document', document.documentElement.clientWidth);
 
-        const isMobile = window.innerWidth <= 768;
-        if (isMobile) {
-          closeNav();
-        } else {
-          setActive(item.label);
-        }
-      }}
-    >
-      <item.icon className={classes.linkIcon} stroke={1.5} />
-      <span>{item.label}</span>
-    </Link>
-  ));
+      const isMobile = window.innerWidth <= 768;
+      if (isMobile) {
+        closeNav();
+      } else {
+        setActive(label);
+      }
+    },
+    [closeNav]
+  );
 
   return (
     <>
-      <div className={classes.navbarMain}>{links}</div>
+      <div className={classes.navbarMain}>
+        {data.map((item) => (
+          <Link
+            className={classes.link}
+            data-active={item.label === active || undefined}
+            to={item.link}
+            key={item.label}
+            onClick={() => onLinkClick(item.label)}
+          >
+            <item.icon className={classes.linkIcon} stroke={1.5} />
+            <span>{item.label}</span>
+          </Link>
+        ))}
+      </div>
 
-      <div className={classes.footer}>
+      {/* <div className={classes.footer}>
         <a
           href="#"
           className={classes.link}
@@ -71,7 +76,7 @@ export default function SideNav({ closeNav }: { closeNav: () => void }) {
           <IconLogout className={classes.linkIcon} stroke={1.5} />
           <span>Logout</span>
         </a>
-      </div>
+      </div> */}
     </>
   );
 }

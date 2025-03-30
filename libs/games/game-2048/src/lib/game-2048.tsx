@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './game-2048.module.scss';
 import {
   initializeBoard,
@@ -11,25 +11,106 @@ export function Game2048() {
   const [board, setBoard] = useState(initializeBoard());
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
-  const onArrowKey = (e: KeyboardEvent) => {
-    const directionMap: { [key: string]: 'left' | 'right' | 'up' | 'down' } = {
-      ArrowLeft: 'left',
-      ArrowRight: 'right',
-      ArrowUp: 'up',
-      ArrowDown: 'down',
-    };
+  const game2048Ref = useRef<HTMLDivElement>(null);
 
-    if (directionMap[e.key]) {
-      const newBoard = move(board, directionMap[e.key], setScore);
+  const handleMove = useCallback(
+    (direction: 'left' | 'right' | 'up' | 'down') => {
+      const newBoard = move(board, direction, setScore);
       setBoard(newBoard);
       setGameOver(isGameOver(newBoard));
+    },
+    [board]
+  );
+
+  // keyboard arrow
+  useEffect(() => {
+    const onArrowKey = (e: KeyboardEvent) => {
+      const directionMap: { [key: string]: 'left' | 'right' | 'up' | 'down' } =
+        {
+          ArrowLeft: 'left',
+          ArrowRight: 'right',
+          ArrowUp: 'up',
+          ArrowDown: 'down',
+        };
+
+      if (directionMap[e.key]) {
+        handleMove(directionMap[e.key]);
+      }
+    };
+
+    window.addEventListener('keydown', onArrowKey);
+    return () => window.removeEventListener('keydown', onArrowKey);
+  }, [handleMove]);
+
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchEndX = 0;
+  let touchEndY = 0;
+
+  const onTouchStart = (e: TouchEvent) => {
+    e.preventDefault();
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  };
+
+  const onTouchMove = (e: TouchEvent) => {
+    e.preventDefault();
+  };
+
+  const onTouchEnd = (e: TouchEvent) => {
+    e.preventDefault();
+    touchEndX = e.changedTouches[0].clientX;
+    touchEndY = e.changedTouches[0].clientY;
+
+    const xDelta = touchEndX - touchStartX;
+    const yDelta = touchEndY - touchStartY;
+
+    if (Math.abs(xDelta) > Math.abs(yDelta)) {
+      // horizonatl swipe
+      if (xDelta > 50) {
+        handleMove('right');
+      } else if (xDelta < -50) {
+        handleMove('left');
+      }
+    } else {
+      // vertical swipe
+      if (yDelta > 50) {
+        handleMove('down');
+      } else if (yDelta < -50) {
+        handleMove('up');
+      }
     }
   };
 
+  // mobile swipes
   useEffect(() => {
-    window.addEventListener('keydown', onArrowKey);
-    return () => window.removeEventListener('keydown', onArrowKey);
+    const game2048Element = game2048Ref.current;
+
+    if (!game2048Element) return;
+
+    game2048Element.addEventListener('touchstart', onTouchStart, {
+      passive: false,
+    });
+    game2048Element.addEventListener('touchmove', onTouchMove, {
+      passive: false,
+    });
+    game2048Element.addEventListener('touchend', onTouchEnd);
+
+    return () => {
+      if (!game2048Element) return;
+      game2048Element.removeEventListener('touchstart', onTouchStart);
+      game2048Element.removeEventListener('touchmove', onTouchMove);
+      game2048Element.removeEventListener('touchend', onTouchEnd);
+    };
   }, [board]);
+
+  useEffect(() => {
+    if (gameOver) {
+      setTimeout(() => {
+        restartGame();
+      }, 1000);
+    }
+  }, [gameOver]);
 
   const restartGame = () => {
     setBoard(initializeBoard());
@@ -47,7 +128,7 @@ export function Game2048() {
       </Text>
 
       {/* Board Container with Overlay */}
-      <div className={styles.boardContainer}>
+      <div ref={game2048Ref} className={styles.boardContainer}>
         <div className={styles.board}>
           {board.map((row, rowIndex) =>
             row.map((cell, colIndex) => (

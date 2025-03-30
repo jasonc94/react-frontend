@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './squad-room.module.scss';
 import WebsocketService from '../services/websocket-service';
 import { Button, Center, Flex, Grid, Title } from '@mantine/core';
@@ -263,30 +263,28 @@ export function SquadRoom() {
     return pc;
   };
 
-  const joinSquadCall = async () => {
+  const joinSquadCall = useCallback(async () => {
     wsService?.current?.send({
       sender: userId.current!,
       type: 'join',
       payload: { type: 'join', payload: { userId: userId.current } },
     });
     setStatus('connected');
-  };
+  }, [wsService, userId]);
 
-  const leaveSquadCall = async () => {
+  const leaveSquadCall = useCallback(async () => {
     wsService?.current?.send({
       sender: userId.current!,
       type: 'leave',
       payload: { type: 'leave', payload: { userId: userId.current } },
     });
     setStatus('ready');
-    // setPeerStreams({});
-    // setPeerConnections({});
     Object.entries(peers).forEach(([peerId, peer]) => {
       peer.peerConnection.close();
       peer.stream?.getTracks().forEach((track) => track.stop());
     });
     setPeers({});
-  };
+  }, [wsService, userId, peers]);
 
   const getColSpan = (index: number) => {
     const totalLength = Object.keys(peers).length + 1;
