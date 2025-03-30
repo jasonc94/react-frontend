@@ -39,7 +39,7 @@ export function ProfessionalExperiences() {
       <Flex
         direction={{ base: 'column', lg: 'row' }}
         justify="center"
-        align="center"
+        align="stretch"
         gap={{ base: 'xl', lg: 'md' }}
         wrap="nowrap"
       >

@@ -23,7 +23,7 @@ const data = [
   { link: '', label: 'Other Settings', icon: IconSettings },
 ];
 
-export default function SideNav() {
+export default function SideNav({ closeNav }: { closeNav: () => void }) {
   const [active, setActive] = useState('Billing');
 
   const links = data.map((item) => (
@@ -33,7 +33,12 @@ export default function SideNav() {
       to={item.link}
       key={item.label}
       onClick={() => {
-        setActive(item.label);
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+          closeNav();
+        } else {
+          setActive(item.label);
+        }
       }}
     >
       <item.icon className={classes.linkIcon} stroke={1.5} />

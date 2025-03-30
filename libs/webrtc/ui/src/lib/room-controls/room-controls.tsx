@@ -59,7 +59,7 @@ export function RoomControls({
     }
   }, [isAudioOn, localStream]);
 
-  const toggleVideoOrAudio = (type: 'video' | 'audio') => {
+  const toggleVideoOrAudio = async (type: 'video' | 'audio') => {
     if (localStream) {
       switch (type) {
         case 'video':
@@ -69,6 +69,12 @@ export function RoomControls({
           setIsAudioOn((prev) => !prev);
           break;
       }
+    } else {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+      onLocalStreamUpdate(stream);
     }
   };
 

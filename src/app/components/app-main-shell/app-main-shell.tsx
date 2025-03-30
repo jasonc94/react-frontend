@@ -14,7 +14,8 @@ import classes from './app-main-shell.module.scss';
 import { useEffect } from 'react';
 
 export function AppMainShell() {
-  const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
+  const [mobileOpened, { toggle: toggleMobile, close: closeNav }] =
+    useDisclosure();
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
 
   // default to dark
@@ -70,7 +71,7 @@ export function AppMainShell() {
         </Group>
       </AppShell.Header>
       <AppShell.Navbar p="md">
-        <SideNav />
+        <SideNav closeNav={closeNav} />
       </AppShell.Navbar>
       <AppShell.Main className={classes.main}>
         <AppRouting />

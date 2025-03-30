@@ -8,8 +8,8 @@ export function Summary() {
         About me
       </Title>
       <p className={styles.text}>
-        Hey! I'm <strong>Jason Cai</strong>. I am a full-stack software engineer
-        with <strong> 7+ years </strong>of experience designing, building, and
+        Hey! I'm <strong>Jason Cai</strong>. I am a software engineer with{' '}
+        <strong> 7+ years </strong>of experience designing, building, and
         deploying scalable, high-performance applications. Along the way, I've
         led teams, mentored devs, and delivered projects that make things run
         smoother and smarter. Always up for a challenge and excited to learn
