@@ -10,9 +10,9 @@ phases:
     runtime-versions:
       nodejs: 20
     commands:
-      # - rm -rf node_modules package-lock.json
+      - rm -rf node_modules package-lock.json
       - echo Installing dependencies...
-      - npm install --omit=optional
+      - npm install
   build:
     commands:
       - echo Building the project...
