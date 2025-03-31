@@ -15,12 +15,12 @@ import { useCallback, useState } from 'react';
 
 const data = [
   { link: '/', label: 'Home', icon: IconHome },
-  { link: '/stock', label: 'Stock', icon: IconRocket },
+  // { link: '/stock', label: 'Stock', icon: IconRocket },
   { link: '/games', label: 'Games', icon: IconDeviceGamepad2 },
   { link: '/squad-connect', label: 'Squad Connect', icon: IconVideoMinus },
-  { link: '', label: 'Databases', icon: IconDatabaseImport },
-  { link: '', label: 'Authentication', icon: Icon2fa },
-  { link: '', label: 'Other Settings', icon: IconSettings },
+  // { link: '', label: 'Databases', icon: IconDatabaseImport },
+  // { link: '', label: 'Authentication', icon: Icon2fa },
+  // { link: '', label: 'Other Settings', icon: IconSettings },
 ];
 
 export default function SideNav({ closeNav }: { closeNav: () => void }) {
