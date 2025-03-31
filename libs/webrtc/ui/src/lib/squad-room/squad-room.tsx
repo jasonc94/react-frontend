@@ -1,14 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import styles from './squad-room.module.scss';
 import WebsocketService from '../services/websocket-service';
 import { Button, Center, Flex, Grid, Title } from '@mantine/core';
 import { useParams, useSearchParams } from 'react-router-dom';
 import UserVideo from '../user-video/user-video';
 import RoomControls from '../room-controls/room-controls';
+import { EnvironmentContext } from '@JC/shared/context';
 
 export function SquadRoom() {
   const { room } = useParams(); // Get the room parameter from the URL
   const [searchParams] = useSearchParams();
+  const env = useContext(EnvironmentContext);
 
   const wsService = useRef<WebsocketService | null>(null);
 
@@ -30,9 +32,10 @@ export function SquadRoom() {
       searchParams.get('name') || Math.random().toString(36).substring(2, 9);
   }
 
-  if (wsService.current === null) {
+  if (wsService.current === null && env?.apiDomain) {
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     wsService.current = new WebsocketService(
-      `ws://localhost:8000/ws/squad-connect/${room}/${userId.current}/`
+      `${protocol}://${env?.apiDomain}/ws/squad-connect/${room}/${userId.current}/`
     );
   }
 
