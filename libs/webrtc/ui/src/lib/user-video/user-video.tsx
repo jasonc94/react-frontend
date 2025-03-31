@@ -46,7 +46,7 @@ export function UserVideo({
       <video
         ref={videoRef}
         autoPlay
-        muted
+        muted={isSelf}
         playsInline
         style={{
           maxHeight: '100%',
