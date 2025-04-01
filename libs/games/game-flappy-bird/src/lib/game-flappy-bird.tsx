@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react';
 import { useFlappyBirdStore } from '../stores/flappy-bird-store';
 import { Bird } from '../actors/bird-actor';
 import { Ground } from '../actors/ground-actor';
+import { Pipe } from '../actors/pipe-actor';
 
 export function GameFlappyBird() {
   const gameContainer = useRef<HTMLCanvasElement>(null);
@@ -26,6 +27,7 @@ export function GameFlappyBird() {
     if (game) {
       addActor(new Bird());
       addActor(new Ground(ex.vec(0, game.screen.drawHeight - 64)));
+      addActor(new Pipe(ex.vec(game.screen.drawWidth, 300), 'bottom'));
       startGame();
     }
   }, [game, addActor, startGame]);

@@ -1,5 +1,6 @@
 import * as ex from 'excalibur';
 import { Ground } from './ground-actor';
+import { Pipe } from './pipe-actor';
 export class Bird extends ex.Actor {
   jumping = false;
 
@@ -17,7 +18,7 @@ export class Bird extends ex.Actor {
   }
 
   override onCollisionStart(_self: ex.Collider, other: ex.Collider): void {
-    if (other.owner instanceof Ground) {
+    if (other.owner instanceof Ground || other.owner instanceof Pipe) {
       this.stop();
     }
   }
