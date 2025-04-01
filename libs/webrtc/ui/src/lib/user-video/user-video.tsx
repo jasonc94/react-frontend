@@ -2,7 +2,7 @@ import { AspectRatio, Text, Overlay, Flex } from '@mantine/core';
 import styles from './user-video.module.scss';
 import { useEffect, useRef, useState } from 'react';
 
-export function UserVideo({
+function UserVideo({
   mediaStream,
   userId,
   isSelf = false,
@@ -95,4 +95,4 @@ export function UserVideo({
   );
 }
 
-export default UserVideo;
+export default React.memo(UserVideo);
