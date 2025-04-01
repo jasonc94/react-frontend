@@ -20,6 +20,19 @@ export function UserVideo({
   useEffect(() => {
     if (videoRef.current && mediaStream) {
       videoRef.current.srcObject = mediaStream;
+      // testing video on ios device not playing
+      const playVideo = () => {
+        if (!videoRef.current) return;
+        console.log('video state', videoRef.current.paused);
+        if (videoRef.current.paused) {
+          videoRef.current
+            ?.play()
+            .catch((err) => console.error('Autoplay failed:', err));
+        }
+      };
+      videoRef.current.onloadedmetadata = playVideo;
+
+      document.body.addEventListener('touchstart', playVideo, { once: true });
     }
   }, [mediaStream]);
 

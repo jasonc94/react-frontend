@@ -235,6 +235,7 @@ export const useRoomStore = create<RoomState & RoomStateActions>((set, get) => {
           return;
         }
         await pc.addIceCandidate(candidate);
+        console.log(`Client added ice candidate from ${peerId}`);
       } catch (e) {
         console.error('error adding ice candidate', e);
       }
