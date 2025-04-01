@@ -4,10 +4,12 @@ import * as ex from 'excalibur';
 import { useEffect, useRef } from 'react';
 import { useFlappyBirdStore } from '../stores/flappy-bird-store';
 import { Bird } from '../actors/bird-actor';
+import { Ground } from '../actors/ground-actor';
 
 export function GameFlappyBird() {
   const gameContainer = useRef<HTMLCanvasElement>(null);
 
+  const game = useFlappyBirdStore((state) => state.gameEngine);
   const initGame = useFlappyBirdStore((state) => state.initGame);
   const addActor = useFlappyBirdStore((state) => state.addActor);
   const exitGame = useFlappyBirdStore((state) => state.exitGame);
@@ -16,10 +18,17 @@ export function GameFlappyBird() {
   useEffect(() => {
     if (gameContainer.current === null) return;
     initGame(gameContainer.current);
-    addActor(new Bird());
-    startGame();
+
     return () => exitGame();
   }, []);
+
+  useEffect(() => {
+    if (game) {
+      addActor(new Bird());
+      addActor(new Ground(ex.vec(0, game.screen.drawHeight - 64)));
+      startGame();
+    }
+  }, [game, addActor, startGame]);
 
   return (
     <Flex direction={'column'} className="flex">
