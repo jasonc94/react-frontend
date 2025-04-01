@@ -26,6 +26,31 @@ export function RoomControls({
   const localStream = useRoomStore((state) => state.localStream);
   const setLocalStream = useRoomStore((state) => state.setLocalStream);
 
+  // try getting media stream again when its mobile
+  useEffect(() => {
+    if (roomStatus !== 'connected') return;
+    const isMobile = () => {
+      return (
+        /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+        'ontouchstart' in window ||
+        navigator.maxTouchPoints > 0
+      );
+    };
+    console.log('isMobile', isMobile());
+    const getMediaStream = async () => {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+
+      setLocalStream(stream, true);
+    };
+    if (isMobile()) {
+      localStream?.getTracks().forEach((track) => track.stop());
+      getMediaStream();
+    }
+  }, [roomStatus]);
+
   useEffect(() => {
     if (localStream) {
       localStream
