@@ -1,12 +1,4 @@
-import {
-  ActionIcon,
-  Button,
-  Center,
-  Flex,
-  Group,
-  Stack,
-  Tooltip,
-} from '@mantine/core';
+import { ActionIcon, Button, Flex, Tooltip } from '@mantine/core';
 import styles from './room-controls.module.scss';
 import {
   IconDoorExit,
@@ -18,30 +10,21 @@ import {
   IconVideoOff,
 } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
+import { useRoomStore } from '../../stores/room-store';
 
 export function RoomControls({
-  roomStatus,
-  localStream,
-  peerConnections,
   onJoinSquadCall,
   onLeaveSquadCall,
-  onLocalStreamUpdate,
 }: {
-  roomStatus: string;
-  localStream: MediaStream | null;
-  peerConnections: {
-    [peerId: string]: {
-      peerConnection: RTCPeerConnection;
-      stream: MediaStream | null;
-    };
-  };
   onJoinSquadCall: () => void;
   onLeaveSquadCall: () => void;
-  onLocalStreamUpdate: (stream: MediaStream) => void;
 }) {
   const [isVideoOn, setIsVideoOn] = useState(false);
   const [isAudioOn, setIsAudioOn] = useState(true);
   const [isScreenShareOn, setIsScreenShareOn] = useState(false);
+  const roomStatus = useRoomStore((state) => state.roomStatus);
+  const localStream = useRoomStore((state) => state.localStream);
+  const setLocalStream = useRoomStore((state) => state.setLocalStream);
 
   useEffect(() => {
     if (localStream) {
@@ -79,18 +62,6 @@ export function RoomControls({
     }
   };
 
-  const replacePeerStream = async (stream: MediaStream) => {
-    Object.values(peerConnections).forEach(({ peerConnection: pc }) => {
-      if (pc.signalingState === 'closed') return;
-      stream.getTracks().forEach((track) => {
-        const sender = pc
-          .getSenders()
-          .find((sender) => sender.track?.kind === track.kind);
-        sender?.replaceTrack(track);
-      });
-    });
-  };
-
   const startScreenShare = async () => {
     try {
       const stream = await navigator.mediaDevices.getDisplayMedia({
@@ -103,10 +74,7 @@ export function RoomControls({
         stopScreenShare();
       });
 
-      replacePeerStream(stream);
-
-      // Update the local stream state
-      onLocalStreamUpdate(stream);
+      setLocalStream(stream, true);
       setIsScreenShareOn(true);
     } catch (e) {
       console.error('Error sharing screen', e);
@@ -121,8 +89,8 @@ export function RoomControls({
         video: true,
         audio: true,
       });
-      replacePeerStream(stream);
-      onLocalStreamUpdate(stream);
+
+      setLocalStream(stream, true);
       setIsScreenShareOn(false);
     } catch (e) {
       console.error('Error sharing screen', e);
