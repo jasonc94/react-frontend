@@ -37,12 +37,17 @@ export function RoomControls({
       );
     };
     console.log('isMobile', isMobile());
+
     const getMediaStream = async () => {
+      const startTime = performance.now();
       const stream = await navigator.mediaDevices.getUserMedia({
         video: true,
         audio: true,
       });
+      const endTime = performance.now();
 
+      const elapsedTime = endTime - startTime;
+      console.log(`Time taken to get camera feed: ${elapsedTime}ms`);
       setLocalStream(stream, true);
     };
     if (isMobile()) {
