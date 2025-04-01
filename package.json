@@ -33,6 +33,7 @@
     "axios": "^1.8.2",
     "dayjs": "^1.11.13",
     "dompurify": "^3.2.4",
+    "excalibur": "^0.30.3",
     "jwt-decode": "^4.0.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
