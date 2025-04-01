@@ -128,11 +128,6 @@ export function SquadRoom() {
       delete copy[peerId];
       return copy;
     });
-    // setPeerStreams((prev) => {
-    //   const copy = { ...prev };
-    //   delete copy[peerId];
-    //   return copy;
-    // });
     console.log(`${peerId} left the room: `);
   };
 
