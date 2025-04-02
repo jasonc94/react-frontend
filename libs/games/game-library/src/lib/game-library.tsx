@@ -11,7 +11,7 @@ export function GameLibrary() {
 
   const games = [
     { label: '2048', value: '2048' },
-    { label: 'Flappy Husky', value: 'flappy-husky' },
+    { label: 'Flappy BB', value: 'flappy-husky' },
   ];
 
   const onSelectGame = (game: string | null) => {
@@ -22,8 +22,8 @@ export function GameLibrary() {
 
   return (
     <Flex direction={'column'} className="flex">
-      <Title order={1} c={'blue'}>
-        Game Library
+      <Title order={1} c={'blue'} ta={'center'}>
+        {currentGame}
       </Title>
       <Flex direction={'row'} gap={'md'} justify={'center'}>
         <Select

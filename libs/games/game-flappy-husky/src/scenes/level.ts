@@ -53,6 +53,9 @@ export class Level extends ex.Scene {
   showStartInstructions() {
     this.startGameLabel.graphics.isVisible = true;
     this.engine.input.pointers.once('down', () => {
+      if (!Resources.BackgroundMusic.isPlaying()) {
+        Resources.BackgroundMusic.play();
+      }
       this.reset();
       this.startGameLabel.graphics.isVisible = false;
       this.husky.start();

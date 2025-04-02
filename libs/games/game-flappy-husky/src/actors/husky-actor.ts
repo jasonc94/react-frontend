@@ -31,7 +31,8 @@ export class Husky extends ex.Actor {
         spriteHeight: 38,
       },
     });
-    this.startSprite = spriteSheet.getSprite(1, 0);
+
+    this.startSprite = ex.Sprite.from(Resources.huskySitImage);
 
     this.upAnimation = ex.Animation.fromSpriteSheet(
       spriteSheet,
@@ -50,7 +51,7 @@ export class Husky extends ex.Actor {
     this.graphics.add('down', this.downAnimation);
     this.graphics.add('up', this.upAnimation);
     this.graphics.add('start', this.startSprite);
-    this.graphics.use('up');
+    this.graphics.use('start');
 
     this.on('exitviewport', () => {
       this.level.triggerGameOver();
@@ -99,6 +100,7 @@ export class Husky extends ex.Actor {
     this.playing = true;
     this.pos = Config.BirdStartPos;
     this.acc = ex.vec(0, Config.BirdAcceleration);
+    this.graphics.use('up');
   }
 
   stop() {
