@@ -58,6 +58,14 @@ export class Level extends ex.Scene {
       this.husky.start();
       this.pipeFactory.start();
       this.ground.start();
+      document.addEventListener(
+        'touchstart',
+        async () => {
+          console.log('touchstart event');
+          this.playBackgroundMusic();
+        },
+        { once: true }
+      ); // Ensures it only runs once
     });
   }
 
@@ -115,12 +123,15 @@ export class Level extends ex.Scene {
     Resources.FailSound.play();
   }
 
-  playBackgroundMusic() {
+  playBackgroundMusic = async () => {
+    if (!Resources.BackgroundMusic.isLoaded()) {
+      await Resources.BackgroundMusic.load();
+    }
     const backgroundPlaying = Resources.BackgroundMusic.isPlaying();
     console.log('backgroundPlaying', backgroundPlaying);
     if (!backgroundPlaying) {
       Resources.BackgroundMusic.loop = true;
       Resources.BackgroundMusic.play();
     }
-  }
+  };
 }
