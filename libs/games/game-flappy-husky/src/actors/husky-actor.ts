@@ -4,7 +4,7 @@ import { Pipe } from './pipe-actor';
 import { Config } from '../configs/flappy-bird-config';
 import { Level } from '../scenes/level';
 import { Resources } from '../assets/resources';
-export class Bird extends ex.Actor {
+export class Husky extends ex.Actor {
   playing = false;
   jumping = false;
   startSprite!: ex.Sprite;

@@ -1,8 +1,8 @@
 import * as ex from 'excalibur';
-import { Bird } from '../actors/bird-actor';
+import { Husky } from '../actors/husky-actor';
 import { Ground } from '../actors/ground-actor';
 import { Pipe } from '../actors/pipe-actor';
-import { useFlappyBirdStore } from '../stores/flappy-bird-store';
+import { useFlappyHuskyStore } from '../stores/flappy-husky-store';
 import { PipeFactory } from '../util/pipe-factory';
 import { Config } from '../configs/flappy-bird-config';
 import { Resources } from '../assets/resources';
@@ -12,7 +12,7 @@ export class Level extends ex.Scene {
   pipeFactory = new PipeFactory(this, this.random, Config.PipeInterval);
   score = 0;
   best = 0;
-  bird = new Bird(this);
+  husky = new Husky(this);
   ground!: Ground;
 
   scoreLabel = new ex.Label({
@@ -55,7 +55,7 @@ export class Level extends ex.Scene {
     this.engine.input.pointers.once('down', () => {
       this.reset();
       this.startGameLabel.graphics.isVisible = false;
-      this.bird.start();
+      this.husky.start();
       this.pipeFactory.start();
       this.ground.start();
     });
@@ -67,8 +67,8 @@ export class Level extends ex.Scene {
   }
 
   override onInitialize(engine: ex.Engine): void {
-    const addActor = useFlappyBirdStore.getState().addActor;
-    addActor(this.bird);
+    const addActor = useFlappyHuskyStore.getState().addActor;
+    addActor(this.husky);
     this.ground = new Ground(ex.vec(0, engine.screen.drawHeight - 64));
     addActor(this.ground);
 
@@ -102,7 +102,7 @@ export class Level extends ex.Scene {
   }
 
   reset() {
-    this.bird.reset();
+    this.husky.reset();
     this.pipeFactory.reset();
     this.score = 0;
     this.scoreLabel.text = `Score: ${this.score}`;
@@ -110,7 +110,7 @@ export class Level extends ex.Scene {
 
   triggerGameOver() {
     this.pipeFactory.stop();
-    this.bird.stop();
+    this.husky.stop();
     this.ground.stop();
     this.showStartInstructions();
     Resources.FailSound.play();

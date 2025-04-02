@@ -1,20 +1,17 @@
 import { Title, Text, Flex } from '@mantine/core';
 import styles from './game-flappy-bird.module.scss';
-import * as ex from 'excalibur';
-import { useEffect, useRef } from 'react';
-import { useFlappyBirdStore } from '../stores/flappy-bird-store';
-import { Bird } from '../actors/bird-actor';
-import { Ground } from '../actors/ground-actor';
-import { Pipe } from '../actors/pipe-actor';
 
-export function GameFlappyBird() {
+import { useEffect, useRef } from 'react';
+import { useFlappyHuskyStore } from '../stores/flappy-husky-store';
+
+export function GameFlappyHusky() {
   const gameContainer = useRef<HTMLCanvasElement>(null);
 
-  const game = useFlappyBirdStore((state) => state.gameEngine);
-  const initGame = useFlappyBirdStore((state) => state.initGame);
-  const addActor = useFlappyBirdStore((state) => state.addActor);
-  const exitGame = useFlappyBirdStore((state) => state.exitGame);
-  const startGame = useFlappyBirdStore((state) => state.startGame);
+  const game = useFlappyHuskyStore((state) => state.gameEngine);
+  const initGame = useFlappyHuskyStore((state) => state.initGame);
+  const addActor = useFlappyHuskyStore((state) => state.addActor);
+  const exitGame = useFlappyHuskyStore((state) => state.exitGame);
+  const startGame = useFlappyHuskyStore((state) => state.startGame);
 
   useEffect(() => {
     if (gameContainer.current === null) return;
@@ -44,4 +41,4 @@ export function GameFlappyBird() {
   );
 }
 
-export default GameFlappyBird;
+export default GameFlappyHusky;

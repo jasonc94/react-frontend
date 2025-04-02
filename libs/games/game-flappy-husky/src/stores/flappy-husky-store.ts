@@ -3,25 +3,25 @@ import { create } from 'zustand';
 import { Level } from '../scenes/level';
 import { Resources } from '../assets/resources';
 
-type FlappyBirdGameState = {
+type FlappyHuskyGameState = {
   gameEngine: ex.Engine | null;
   level: 'Level';
 };
 
-type FlappyBirdStateActions = {
+type FlappyHuskyStateActions = {
   initGame: (canvas: HTMLCanvasElement) => void;
   startGame: () => Promise<void>;
   addActor: (actor: ex.Actor) => void;
   exitGame: () => void;
 };
 
-const initialFlappyBirdGameState: FlappyBirdGameState = {
+const initialFlappyBirdGameState: FlappyHuskyGameState = {
   gameEngine: null,
   level: 'Level',
 };
 
-export const useFlappyBirdStore = create<
-  FlappyBirdGameState & FlappyBirdStateActions
+export const useFlappyHuskyStore = create<
+  FlappyHuskyGameState & FlappyHuskyStateActions
 >((set, get) => {
   return {
     ...initialFlappyBirdGameState,
