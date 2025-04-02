@@ -8,7 +8,7 @@ import huskySitImage from './images/dog_medium_sitframe.png';
 import flapSound from './sounds/flap.wav';
 import failSound from './sounds/fail.wav';
 import scoreSound from './sounds/score.wav';
-import backgroundMusic from './sounds/two_left_socks.ogg';
+import backgroundMusic from './sounds/backgroundMusic.mp3';
 
 export const Resources = {
   huskySitImage: new ex.ImageSource(huskySitImage),
