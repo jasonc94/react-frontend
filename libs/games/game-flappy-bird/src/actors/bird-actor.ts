@@ -3,9 +3,14 @@ import { Ground } from './ground-actor';
 import { Pipe } from './pipe-actor';
 import { Config } from '../configs/flappy-bird-config';
 import { Level } from '../scenes/level';
+import { Resources } from '../assets/resources';
 export class Bird extends ex.Actor {
   playing = false;
   jumping = false;
+  startSprite!: ex.Sprite;
+
+  upAnimation!: ex.Animation;
+  downAnimation!: ex.Animation;
 
   constructor(private level: Level) {
     super({
@@ -16,7 +21,36 @@ export class Bird extends ex.Actor {
   }
 
   override onInitialize(): void {
-    // this.acc = ex.vec(0, Config.BirdAcceleration); // pixels per second per second
+    const spriteSheet = ex.SpriteSheet.fromImageSource({
+      image: Resources.BirdImage,
+      grid: {
+        rows: 1,
+        columns: 4,
+        spriteWidth: 32,
+        spriteHeight: 32,
+      },
+    });
+    this.startSprite = spriteSheet.getSprite(1, 0);
+
+    this.upAnimation = ex.Animation.fromSpriteSheet(
+      spriteSheet,
+      [2, 1, 0], // 3rd frame, then 2nd, then first
+      150, // 150ms for each frame
+      ex.AnimationStrategy.Freeze
+    );
+    // Animation to play going down
+    this.downAnimation = ex.Animation.fromSpriteSheet(
+      spriteSheet,
+      [0, 1, 2],
+      150,
+      ex.AnimationStrategy.Freeze
+    );
+
+    this.graphics.add('down', this.downAnimation);
+    this.graphics.add('up', this.upAnimation);
+    this.graphics.add('start', this.startSprite);
+    this.graphics.use('start');
+
     this.on('exitviewport', () => {
       this.level.triggerGameOver();
     });

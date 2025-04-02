@@ -1,6 +1,7 @@
 import * as ex from 'excalibur';
 import { create } from 'zustand';
 import { Level } from '../scenes/level';
+import { Resources } from '../assets/resources';
 
 type FlappyBirdGameState = {
   gameEngine: ex.Engine | null;
@@ -30,7 +31,7 @@ export const useFlappyBirdStore = create<
         height: 500,
         backgroundColor: ex.Color.fromHex('#54C0CA'),
         pixelArt: true,
-        pixelRatio: 2,
+        pixelRatio: 1,
         displayMode: ex.DisplayMode.FitContainer,
         canvasElement: canvas,
         scenes: { Level: Level },
@@ -46,7 +47,8 @@ export const useFlappyBirdStore = create<
     startGame: async () => {
       const { gameEngine } = get();
       if (!gameEngine) return;
-      await gameEngine.start();
+      const loader = new ex.Loader(Object.values(Resources));
+      await gameEngine.start(loader);
       gameEngine.goToScene('Level');
     },
     exitGame: () => {
