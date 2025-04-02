@@ -1,6 +1,7 @@
 import { AspectRatio, Text, Overlay, Flex } from '@mantine/core';
 import styles from './user-video.module.scss';
 import { useEffect, useRef, useState } from 'react';
+import React from 'react';
 
 function UserVideo({
   mediaStream,

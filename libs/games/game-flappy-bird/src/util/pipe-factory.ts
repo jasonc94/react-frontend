@@ -3,7 +3,7 @@ import * as ex from 'excalibur';
 import { Level } from '../scenes/level';
 import { Pipe } from '../actors/pipe-actor';
 import { Config } from '../configs/flappy-bird-config';
-import { ScoreTrigger } from './score-trigger';
+import { ScoreTrigger } from '../actors/score-trigger';
 
 export class PipeFactory {
   private timer: ex.Timer;
