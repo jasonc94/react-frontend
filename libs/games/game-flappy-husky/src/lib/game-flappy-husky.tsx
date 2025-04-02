@@ -17,7 +17,10 @@ export function GameFlappyHusky() {
     if (gameContainer.current === null) return;
     initGame(gameContainer.current);
 
-    return () => exitGame();
+    return () => {
+      gameContainer.current?.remove();
+      exitGame();
+    };
   }, []);
 
   useEffect(() => {
@@ -28,9 +31,6 @@ export function GameFlappyHusky() {
 
   return (
     <Flex direction={'column'} className="flex">
-      <Title order={1} c={'blue'}>
-        2048 Game
-      </Title>
       <Text tt={'uppercase'} c="blue" ta={'center'}>
         Score:
       </Text>

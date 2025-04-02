@@ -22,6 +22,7 @@
       "@JC/games/game-flappy-husky": [
         "libs/games/game-flappy-husky/src/index.ts"
       ],
+      "@JC/games/game-library": ["libs/games/game-library/src/index.ts"],
       "@JC/home": ["libs/home/ui/src/index.ts"],
       "@JC/models": ["libs/models/src/index.ts"],
       "@JC/resume": ["libs/resume/src/index.ts"],

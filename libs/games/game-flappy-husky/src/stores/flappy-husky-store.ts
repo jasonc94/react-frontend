@@ -32,6 +32,7 @@ export const useFlappyHuskyStore = create<
         backgroundColor: ex.Color.fromHex('#54C0CA'),
         pixelArt: true,
         pixelRatio: 1,
+        suppressPlayButton: true,
         displayMode: ex.DisplayMode.FitContainer,
         canvasElement: canvas,
         scenes: { Level: Level },
@@ -52,9 +53,11 @@ export const useFlappyHuskyStore = create<
       gameEngine.goToScene('Level');
     },
     exitGame: () => {
+      console.log('exiting game');
       const { gameEngine } = get();
       if (!gameEngine) return;
       gameEngine.stop();
+      // gameEngine.canvas.remove();
       set(initialFlappyBirdGameState);
     },
   };

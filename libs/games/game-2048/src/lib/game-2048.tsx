@@ -120,9 +120,9 @@ export function Game2048() {
 
   return (
     <div className={styles.gameContainer}>
-      <Title order={1} c={'blue'}>
+      {/* <Title order={1} c={'blue'}>
         2048 Game
-      </Title>
+      </Title> */}
       <Text tt={'uppercase'} c="blue" ta={'center'}>
         Score: {score}
       </Text>
