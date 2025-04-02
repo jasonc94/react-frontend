@@ -25,9 +25,6 @@ export function GameFlappyBird() {
 
   useEffect(() => {
     if (game) {
-      addActor(new Bird());
-      addActor(new Ground(ex.vec(0, game.screen.drawHeight - 64)));
-      addActor(new Pipe(ex.vec(game.screen.drawWidth, 300), 'bottom'));
       startGame();
     }
   }, [game, addActor, startGame]);

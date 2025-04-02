@@ -1,19 +1,22 @@
 import * as ex from 'excalibur';
 import { create } from 'zustand';
+import { Level } from '../scenes/level';
 
 type FlappyBirdGameState = {
   gameEngine: ex.Engine | null;
+  level: 'Level';
 };
 
 type FlappyBirdStateActions = {
   initGame: (canvas: HTMLCanvasElement) => void;
-  startGame: () => void;
+  startGame: () => Promise<void>;
   addActor: (actor: ex.Actor) => void;
   exitGame: () => void;
 };
 
 const initialFlappyBirdGameState: FlappyBirdGameState = {
   gameEngine: null,
+  level: 'Level',
 };
 
 export const useFlappyBirdStore = create<
@@ -30,6 +33,7 @@ export const useFlappyBirdStore = create<
         pixelRatio: 2,
         displayMode: ex.DisplayMode.FitContainer,
         canvasElement: canvas,
+        scenes: { Level: Level },
       });
 
       set({ gameEngine: game });
@@ -39,10 +43,11 @@ export const useFlappyBirdStore = create<
       if (!gameEngine) return;
       gameEngine.add(actor);
     },
-    startGame: () => {
+    startGame: async () => {
       const { gameEngine } = get();
       if (!gameEngine) return;
-      gameEngine.start();
+      await gameEngine.start();
+      gameEngine.goToScene('Level');
     },
     exitGame: () => {
       const { gameEngine } = get();

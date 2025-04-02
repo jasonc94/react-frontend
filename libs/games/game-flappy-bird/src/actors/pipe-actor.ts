@@ -12,7 +12,7 @@ export class Pipe extends ex.Actor {
           : ex.vec(0, 1), // top anchor from the bottom left
       color: ex.Color.Green,
       vel: ex.vec(-200, 0),
-      z: -1, // position the pipe under everything
+      z: -1,
     });
 
     this.on('exitviewport', () => this.kill());
