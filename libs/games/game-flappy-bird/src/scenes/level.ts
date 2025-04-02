@@ -5,6 +5,7 @@ import { Pipe } from '../actors/pipe-actor';
 import { useFlappyBirdStore } from '../stores/flappy-bird-store';
 import { PipeFactory } from '../util/pipe-factory';
 import { Config } from '../configs/flappy-bird-config';
+import { Resources } from '../assets/resources';
 
 export class Level extends ex.Scene {
   random = new ex.Random();
@@ -60,6 +61,11 @@ export class Level extends ex.Scene {
     });
   }
 
+  override onActivate(): void {
+    Resources.BackgroundMusic.loop = true;
+    Resources.BackgroundMusic.play();
+  }
+
   override onInitialize(engine: ex.Engine): void {
     const addActor = useFlappyBirdStore.getState().addActor;
     addActor(this.bird);
@@ -107,5 +113,6 @@ export class Level extends ex.Scene {
     this.bird.stop();
     this.ground.stop();
     this.showStartInstructions();
+    Resources.FailSound.play();
   }
 }

@@ -1,6 +1,7 @@
 import * as ex from 'excalibur';
 import { Level } from '../scenes/level';
 import { Config } from '../configs/flappy-bird-config';
+import { Resources } from '../assets/resources';
 
 export class ScoreTrigger extends ex.Actor {
   constructor(pos: ex.Vector, private level: Level) {
@@ -19,5 +20,6 @@ export class ScoreTrigger extends ex.Actor {
 
   override onCollisionStart(): void {
     this.level.incrementScore();
+    Resources.ScoreSound.play();
   }
 }

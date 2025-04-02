@@ -21,22 +21,23 @@ export class Bird extends ex.Actor {
   }
 
   override onInitialize(): void {
+    this.scale.x = -1;
     const spriteSheet = ex.SpriteSheet.fromImageSource({
-      image: Resources.BirdImage,
+      image: Resources.huskyImage,
       grid: {
         rows: 1,
-        columns: 4,
-        spriteWidth: 32,
-        spriteHeight: 32,
+        columns: 5,
+        spriteWidth: 60,
+        spriteHeight: 38,
       },
     });
     this.startSprite = spriteSheet.getSprite(1, 0);
 
     this.upAnimation = ex.Animation.fromSpriteSheet(
       spriteSheet,
-      [2, 1, 0], // 3rd frame, then 2nd, then first
+      [0, 1, 2, 3, 4], // 3rd frame, then 2nd, then first
       150, // 150ms for each frame
-      ex.AnimationStrategy.Freeze
+      ex.AnimationStrategy.Loop
     );
     // Animation to play going down
     this.downAnimation = ex.Animation.fromSpriteSheet(
@@ -49,7 +50,7 @@ export class Bird extends ex.Actor {
     this.graphics.add('down', this.downAnimation);
     this.graphics.add('up', this.upAnimation);
     this.graphics.add('start', this.startSprite);
-    this.graphics.use('start');
+    this.graphics.use('up');
 
     this.on('exitviewport', () => {
       this.level.triggerGameOver();
@@ -75,6 +76,7 @@ export class Bird extends ex.Actor {
     if (!this.jumping && this.isInputActive(engine)) {
       this.vel.y += Config.BirdJumpVelocity;
       this.jumping = true;
+      Resources.FlapSound.play();
     }
     if (!this.isInputActive(engine)) {
       this.jumping = false;
@@ -88,7 +90,9 @@ export class Bird extends ex.Actor {
     );
 
     // The "speed" the bird will move relative to pipes
-    this.rotation = ex.vec(Config.PipeSpeed, this.vel.y).toAngle();
+    this.rotation = ex
+      .vec(Config.PipeSpeed, this.vel.y > 0 ? -100 : 100)
+      .toAngle();
   }
 
   start() {
