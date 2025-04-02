@@ -23,7 +23,7 @@ export function GameLibrary() {
   return (
     <Flex direction={'column'} className="flex">
       <Title order={1} c={'blue'} ta={'center'}>
-        {currentGame}
+        {games.find((game) => game.value === currentGame)?.label}
       </Title>
       <Flex direction={'row'} gap={'md'} justify={'center'}>
         <Select
