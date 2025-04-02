@@ -53,9 +53,6 @@ export class Level extends ex.Scene {
   showStartInstructions() {
     this.startGameLabel.graphics.isVisible = true;
     this.engine.input.pointers.once('down', () => {
-      if (!Resources.BackgroundMusic.isPlaying()) {
-        Resources.BackgroundMusic.play();
-      }
       this.reset();
       this.startGameLabel.graphics.isVisible = false;
       this.husky.start();
@@ -65,8 +62,7 @@ export class Level extends ex.Scene {
   }
 
   override onActivate(): void {
-    Resources.BackgroundMusic.loop = true;
-    Resources.BackgroundMusic.play();
+    this.playBackgroundMusic();
   }
 
   override onInitialize(engine: ex.Engine): void {
@@ -117,5 +113,14 @@ export class Level extends ex.Scene {
     this.ground.stop();
     this.showStartInstructions();
     Resources.FailSound.play();
+  }
+
+  playBackgroundMusic() {
+    const backgroundPlaying = Resources.BackgroundMusic.isPlaying();
+    console.log('backgroundPlaying', backgroundPlaying);
+    if (!backgroundPlaying) {
+      Resources.BackgroundMusic.loop = true;
+      Resources.BackgroundMusic.play();
+    }
   }
 }

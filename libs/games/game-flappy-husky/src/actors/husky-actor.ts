@@ -101,6 +101,7 @@ export class Husky extends ex.Actor {
     this.pos = Config.BirdStartPos;
     this.acc = ex.vec(0, Config.BirdAcceleration);
     this.graphics.use('up');
+    this.level.playBackgroundMusic();
   }
 
   stop() {
