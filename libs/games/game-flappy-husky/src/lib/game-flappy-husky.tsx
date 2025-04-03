@@ -1,4 +1,4 @@
-import { Title, Text, Flex, Overlay, Button } from '@mantine/core';
+import { Title, Text, Flex, Overlay, Button, AspectRatio } from '@mantine/core';
 import styles from './game-flappy-husky.module.scss';
 
 import { useEffect, useRef, useState } from 'react';
@@ -44,14 +44,19 @@ export function GameFlappyHusky() {
 
   return (
     <Flex justify={'center'} className="flex">
-      <div className={styles.gameContainer}>
-        <div style={{ height: '100%' }}>
-          <canvas
-            ref={gameContainer}
-            style={{ display: 'block', width: '100%', height: '100%' }}
-          ></canvas>
-        </div>
-
+      <AspectRatio
+        ratio={4 / 5}
+        style={{ display: 'flex', position: 'relative' }}
+      >
+        <canvas
+          ref={gameContainer}
+          style={{
+            maxHeight: '100%',
+            maxWidth: '100%',
+            marginLeft: 'auto',
+            marginRight: 'auto',
+          }}
+        ></canvas>
         {gameOver && (
           <Overlay color="#000" center>
             <Flex direction="column" justify="center" align="center" gap="md">
@@ -70,7 +75,7 @@ export function GameFlappyHusky() {
             </Flex>
           </Overlay>
         )}
-      </div>
+      </AspectRatio>
     </Flex>
   );
 }
