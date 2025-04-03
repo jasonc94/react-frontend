@@ -50,12 +50,7 @@ export function GameFlappyHusky() {
       >
         <canvas
           ref={gameContainer}
-          style={{
-            maxHeight: '100%',
-            maxWidth: '100%',
-            marginLeft: 'auto',
-            marginRight: 'auto',
-          }}
+          style={{ display: 'block', width: '100%', height: '100%' }}
         ></canvas>
         {gameOver && (
           <Overlay color="#000" center>
