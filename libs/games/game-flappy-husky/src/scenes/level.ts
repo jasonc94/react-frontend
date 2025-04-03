@@ -119,8 +119,8 @@ export class Level extends ex.Scene {
     this.pipeFactory.stop();
     this.husky.stop();
     this.ground.stop();
-    this.showStartInstructions();
     Resources.FailSound.play();
+    useFlappyHuskyStore.setState({ gameOver: true });
   }
 
   playBackgroundMusic = async () => {

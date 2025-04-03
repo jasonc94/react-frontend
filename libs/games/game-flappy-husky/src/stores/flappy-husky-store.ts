@@ -5,7 +5,7 @@ import { Resources } from '../assets/resources';
 
 type FlappyHuskyGameState = {
   gameEngine: ex.Engine | null;
-  level: 'Level';
+  gameOver: boolean;
 };
 
 type FlappyHuskyStateActions = {
@@ -17,7 +17,7 @@ type FlappyHuskyStateActions = {
 
 const initialFlappyBirdGameState: FlappyHuskyGameState = {
   gameEngine: null,
-  level: 'Level',
+  gameOver: false,
 };
 
 export const useFlappyHuskyStore = create<
@@ -35,7 +35,7 @@ export const useFlappyHuskyStore = create<
         suppressPlayButton: true,
         displayMode: ex.DisplayMode.FitContainer,
         canvasElement: canvas,
-        scenes: { Level: Level },
+        scenes: { Level0: Level },
       });
 
       set({ gameEngine: game });
@@ -50,7 +50,7 @@ export const useFlappyHuskyStore = create<
       if (!gameEngine) return;
       const loader = new ex.Loader(Object.values(Resources));
       await gameEngine.start(loader);
-      gameEngine.goToScene('Level');
+      gameEngine.goToScene('Level0');
     },
     exitGame: () => {
       console.log('exiting game');

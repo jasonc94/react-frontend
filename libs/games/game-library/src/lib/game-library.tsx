@@ -21,7 +21,7 @@ export function GameLibrary() {
   };
 
   return (
-    <Flex direction={'column'} className="flex">
+    <Flex direction={'column'} className="flex" gap={'md'}>
       <Title order={1} c={'blue'} ta={'center'}>
         {games.find((game) => game.value === currentGame)?.label}
       </Title>
