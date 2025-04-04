@@ -40,15 +40,7 @@ export class Husky extends ex.Actor {
       150, // 150ms for each frame
       ex.AnimationStrategy.Loop
     );
-    // Animation to play going down
-    this.downAnimation = ex.Animation.fromSpriteSheet(
-      spriteSheet,
-      [0, 1, 2],
-      150,
-      ex.AnimationStrategy.Freeze
-    );
 
-    this.graphics.add('down', this.downAnimation);
     this.graphics.add('up', this.upAnimation);
     this.graphics.add('start', this.startSprite);
     this.graphics.use('start');
