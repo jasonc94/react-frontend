@@ -2,6 +2,7 @@ import * as ex from 'excalibur';
 import { create } from 'zustand';
 import { Level } from '../scenes/level';
 import { Resources } from '../assets/resources';
+import { BBLoaderScreen } from '../configs/bb-loader-screen';
 
 type FlappyHuskyGameState = {
   gameEngine: ex.Engine | null;
@@ -28,7 +29,7 @@ export const useFlappyHuskyStore = create<
     initGame: (canvas: HTMLCanvasElement) => {
       const game = new ex.Engine({
         width: 400,
-        height: 500,
+        height: 600,
         backgroundColor: ex.Color.fromHex('#54C0CA'),
         pixelArt: true,
         pixelRatio: 1,
@@ -48,7 +49,7 @@ export const useFlappyHuskyStore = create<
     startGame: async () => {
       const { gameEngine } = get();
       if (!gameEngine) return;
-      const loader = new ex.Loader(Object.values(Resources));
+      const loader = new BBLoaderScreen(Object.values(Resources));
       await gameEngine.start(loader);
       gameEngine.goToScene('Level0');
     },

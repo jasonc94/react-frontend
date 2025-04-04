@@ -45,7 +45,7 @@ export function GameFlappyHusky() {
   return (
     <Flex justify={'center'} className="flex">
       <AspectRatio
-        ratio={4 / 5}
+        ratio={4 / 6}
         style={{ display: 'flex', position: 'relative' }}
       >
         <canvas
