@@ -45,6 +45,7 @@ export function GameFlappyHusky() {
   return (
     <Flex justify={'center'} className="flex">
       <AspectRatio
+        className="noselect"
         ratio={400 / 550}
         style={{ display: 'flex', position: 'relative' }}
       >
