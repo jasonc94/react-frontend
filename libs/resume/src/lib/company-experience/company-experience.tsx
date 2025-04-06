@@ -84,7 +84,7 @@ export function CompanyExperience({
           </Card.Section>
           <Group mt="xs">
             <Button radius="md" style={{ flex: 1 }}>
-              N/A
+              TBD
             </Button>
             <ActionIcon variant="default" radius="md" size={36}>
               <IconHeart className={classes.like} stroke={1.5} />

@@ -101,8 +101,7 @@ export function Home() {
 
           <Text mt="lg">
             Take a look around, see what I've been working on, and if you like
-            what you see, let's connect! I'm always up for chatting about cool
-            tech or collaborating on something awesome.
+            what you see, let's connect!
           </Text>
         </Card>
       </Container>

@@ -33,15 +33,6 @@ export function GameLibrary() {
           value={currentGame}
           onChange={onSelectGame}
         />
-        {/* {games.map((game) => (
-          <Button
-            key={game}
-            variant="filled"
-            onClick={() => setCurrentGame(game as '2048' | 'flappy-husky')}
-          >
-            {game}
-          </Button>
-        ))} */}
       </Flex>
 
       {currentGame === 'flappy-husky' ? <GameFlappyHusky /> : <Game2048 />}

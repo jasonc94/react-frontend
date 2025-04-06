@@ -8,6 +8,7 @@ import {
   IconDatabaseImport,
   IconSwitchHorizontal,
   IconLogout,
+  IconLibrary,
 } from '@tabler/icons-react';
 import classes from './side-nav.module.scss';
 import { Link, useLocation } from 'react-router-dom';
@@ -18,7 +19,7 @@ const navs = [
   // { link: '/stock', label: 'Stock', icon: IconRocket },
   { link: '/games', label: 'Games', icon: IconDeviceGamepad2 },
   { link: '/squad-connect', label: 'Squad Connect', icon: IconVideoMinus },
-  // { link: '', label: 'Databases', icon: IconDatabaseImport },
+  { link: '/tutorials', label: 'Tutorials', icon: IconLibrary },
   // { link: '', label: 'Authentication', icon: Icon2fa },
   // { link: '', label: 'Other Settings', icon: IconSettings },
 ];

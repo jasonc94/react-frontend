@@ -1,0 +1,9 @@
+{
+  "name": "tutorials",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/tutorials/src",
+  "projectType": "library",
+  "tags": ["feature"],
+  "// targets": "to see all targets run: nx show project tutorials --web",
+  "targets": {}
+}
