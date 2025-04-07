@@ -1,5 +1,9 @@
 # Auto Deploy React App to AWS
 
+```c#
+console.log('test');
+```
+
 ## Steps
 
 ### Step 1: Push React App to GitHub
