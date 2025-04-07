@@ -1,9 +1,5 @@
 # Auto Deploy React App to AWS
 
-```c#
-console.log('test');
-```
-
 ## Steps
 
 ### Step 1: Push React App to GitHub
@@ -13,18 +9,18 @@ console.log('test');
 - Enter a bucket name and create with default settings
 - Go to the bucket created, under permissions turn off `Block public access` and attach a bucket policy to enable public read access to all bucket objects
 
-```
+```json
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "PublicRead",
-            "Effect": "Allow",
-            "Principal": "*",
-            "Action": "s3:GetObject",
-            "Resource": "arn:aws:s3:::{bucket-name-placeholder}/*"
-        }
-    ]
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "PublicRead",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::{bucket-name-placeholder}/*"
+    }
+  ]
 }
 ```
 
@@ -39,7 +35,7 @@ console.log('test');
   - create a buildspec.yml in react repo and push to GitHub.
   - The following is an example buildspec file with `S3_BUCKET` defined in CodeBuild environment variable. The buildspec file defines commands to install dependencies, build the project and uploads the build output to S3 bucket.
 
-```
+```yml
 version: 0.2
 
 cache:
@@ -69,7 +65,6 @@ phases:
       - echo Uploading files to S3...
       - echo S3 bucket - $S3_BUCKET
       - aws s3 sync ./dist/react-web-app s3://$S3_BUCKET --delete
-
 ```
 
 - enable optional CloudWatch log, and create build project
