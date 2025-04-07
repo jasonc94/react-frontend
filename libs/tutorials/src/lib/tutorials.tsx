@@ -1,6 +1,7 @@
 import styles from './tutorials.module.scss';
 import { Flex, Select, Title } from '@mantine/core';
 import { useState } from 'react';
+import DeployReact from './deploy-react/deploy-react';
 
 export function Tutorials() {
   const [currentTutorial, setCurrentTutorial] = useState<
@@ -33,6 +34,8 @@ export function Tutorials() {
           onChange={onSelectTutorial}
         />
       </Flex>
+
+      <DeployReact />
     </Flex>
   );
 }

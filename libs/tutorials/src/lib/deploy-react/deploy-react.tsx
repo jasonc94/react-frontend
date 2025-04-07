@@ -1,10 +1,16 @@
+import { useEffect } from 'react';
 import styles from './deploy-react.module.scss';
+import ReactMarkdown from 'react-markdown';
+import deployReact from '../markdowns/deploy-react/deploy-react.md?raw';
+import { Flex } from '@mantine/core';
 
 export function DeployReact() {
   return (
-    <div className={styles['container']}>
-      <h1>Welcome to DeployReact!</h1>
-    </div>
+    <Flex direction={'row'} justify={'center'}>
+      <div>
+        <ReactMarkdown>{deployReact}</ReactMarkdown>
+      </div>
+    </Flex>
   );
 }
 
