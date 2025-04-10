@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './squad-lobby.module.scss';
 import {
   Button,
@@ -7,14 +7,14 @@ import {
   Flex,
   Group,
   Input,
-  Modal,
   Popover,
   Stack,
   Text,
-  TextInput,
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { useNavigate } from 'react-router-dom';
+import { useApi } from '@JC/shared/api';
+import { Room } from '@JC/models';
 
 export function SquadLobby() {
   const [isCreatingRoom, setIsCreatingRoom] = useState(false);
@@ -22,16 +22,36 @@ export function SquadLobby() {
   const [newSquadName, setNewSquadName] = useState('');
   const [searchString, setSearchString] = useState('');
   const [joinAsName, setJoinAsName] = useState('');
-  const [squads, setSquads] = useState(['Alpha', 'Bravo', 'Charlie']);
+  const [squads, setSquads] = useState<Room[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const { api } = useApi(false);
   const navigate = useNavigate();
 
   const filteredSquads = squads.filter((room) =>
-    room.toLowerCase().includes(searchString.toLowerCase())
+    room.name.toLowerCase().includes(searchString.toLowerCase())
   );
 
-  const createSquad = () => {
+  useEffect(() => {
+    const fetchRooms = async () => {
+      setLoading(true);
+      try {
+        const response = await api.get<Room[]>('/chatrooms/rooms/');
+
+        setSquads(response.data);
+      } catch (err) {
+        setError((err as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRooms();
+  }, []);
+
+  const createSquad = async () => {
     if (newSquadName.trim()) {
-      if (squads.includes(newSquadName)) {
+      if (squads.some((room) => room.name === newSquadName)) {
         notifications.show({
           title: 'Error',
           message: 'Squad already exists',
@@ -39,11 +59,17 @@ export function SquadLobby() {
         });
         return;
       }
-      setSquads([...squads, newSquadName]);
+      const response = await api.post('/chatrooms/rooms/', {
+        name: newSquadName,
+      });
+      setSquads([...squads, response.data]);
       setNewSquadName('');
       setIsCreatingRoom(false);
     }
   };
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
 
   return (
     <div>
@@ -94,10 +120,13 @@ export function SquadLobby() {
           filteredSquads.map((squad, index) => (
             <Card key={index} shadow="sm" padding="lg" withBorder>
               <Group justify="space-between">
-                <Text>{squad}</Text>
-                {/* <Button onClick={() => navigate(`/squad-connect/${squad}`)}>
-                  Enter Squad Room
-                </Button> */}
+                <Text fw={700}>{squad.name}</Text>
+                {squad.participants?.length && (
+                  <Text>
+                    <b>Participants: </b>
+                    {squad.participants?.map((p) => p.name).join(', ')}
+                  </Text>
+                )}
 
                 <Popover
                   opened={isEnteringRoom === index}
@@ -121,7 +150,9 @@ export function SquadLobby() {
                       />
                       <Button
                         onClick={() =>
-                          navigate(`/squad-connect/${squad}?name=${joinAsName}`)
+                          navigate(
+                            `/squad-connect/${squad.name}?name=${joinAsName}`
+                          )
                         }
                       >
                         Ok
