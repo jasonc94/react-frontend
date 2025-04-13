@@ -19,7 +19,7 @@ export function RoomControls({
   onJoinSquadCall: () => void;
   onLeaveSquadCall: () => void;
 }) {
-  const [isVideoOn, setIsVideoOn] = useState(false);
+  const [isVideoOn, setIsVideoOn] = useState(true);
   const [isAudioOn, setIsAudioOn] = useState(true);
   const [isScreenShareOn, setIsScreenShareOn] = useState(false);
   const roomStatus = useRoomStore((state) => state.roomStatus);

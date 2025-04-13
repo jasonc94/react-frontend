@@ -1,6 +1,7 @@
-import { AspectRatio, Text, Overlay, Flex } from '@mantine/core';
+import { AspectRatio, Text, Overlay, Flex, Avatar } from '@mantine/core';
 import styles from './user-video.module.scss';
 import { useEffect, useRef, useState } from 'react';
+import { IconGhost2 } from '@tabler/icons-react';
 import React from 'react';
 
 function UserVideo({
@@ -14,14 +15,28 @@ function UserVideo({
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
+  const [isCameraOn, setIsCameraOn] = useState(false);
   const [aspectRatio, setAspectRatio] = useState<number>(
     window.innerWidth / window.innerHeight
   );
-
   useEffect(() => {
     if (videoRef.current && mediaStream) {
       videoRef.current.srcObject = mediaStream;
     }
+
+    const checkCameraStatus = () => {
+      const hasCameraFeed = mediaStream?.getVideoTracks().some((track) => {
+        return track.enabled && track.readyState === 'live';
+      });
+
+      setIsCameraOn(!!hasCameraFeed);
+    };
+
+    checkCameraStatus();
+
+    const interval = setInterval(checkCameraStatus, 1000); // Polling every second
+
+    return () => clearInterval(interval);
   }, [mediaStream]);
 
   useEffect(() => {
@@ -59,6 +74,41 @@ function UserVideo({
           objectFit: 'contain',
         }}
       />
+      <Text
+        style={{
+          position: 'absolute',
+          top: '96%',
+          left: '10px',
+          width: 'auto',
+          fontWeight: 'bold',
+        }}
+      >
+        User: {userId}
+      </Text>
+      {!isCameraOn && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            height: '100%',
+            backgroundColor: '#000',
+            borderRadius: '8px',
+          }}
+        >
+          <Flex direction={'column'} align={'center'} gap={'md'}>
+            <Avatar size={'xl'} name="User" variant="filled" color="indigo">
+              <IconGhost2></IconGhost2>
+            </Avatar>
+            User: {userId}
+          </Flex>
+        </div>
+      )}
     </AspectRatio>
 
     // <AspectRatio ratio={aspectRatio} mx="auto">
