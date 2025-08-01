@@ -124,7 +124,7 @@ export function SquadLobby() {
                 {squad.participants?.length && (
                   <Text>
                     <b>Participants: </b>
-                    {squad.participants?.map((p) => p.name).join(', ')}
+                    {squad.participants?.map((p) => p.user.name).join(', ')}
                   </Text>
                 )}
 

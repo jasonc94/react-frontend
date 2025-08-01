@@ -7,6 +7,7 @@ import UserVideo from '../user-video/user-video';
 import RoomControls from '../room-controls/room-controls';
 import { EnvironmentContext } from '@JC/shared/context';
 import { useRoomStore } from '../../stores/room-store';
+import { useAppStore } from '@JC/shared/store';
 
 export function SquadRoom() {
   const { room } = useParams(); // Get the room parameter from the URL
@@ -14,7 +15,6 @@ export function SquadRoom() {
   const env = useContext(EnvironmentContext);
 
   const wsServiceRef = useRef<WebsocketService | null>(null);
-  const userIdRef = useRef<string>(null);
 
   const [websocketConnected, setWebsocketConnected] = useState(false);
 
@@ -29,16 +29,20 @@ export function SquadRoom() {
   const onPeerAnswer = useRoomStore((state) => state.onPeerAnswer);
   const onPeerIceCandidate = useRoomStore((state) => state.onPeerIceCandidate);
   const cleanup = useRoomStore((state) => state.cleanUp);
-
-  if (!userIdRef.current) {
-    userIdRef.current =
-      searchParams.get('name') || Math.random().toString(36).substring(2, 9);
-  }
+  const user = useAppStore((state) => state.user);
+  const setUser = useAppStore((state) => state.setUser);
 
   if (wsServiceRef.current === null && env?.apiDomain) {
+    let displayName = searchParams.get('name');
+    if (!displayName) displayName = user.displayName;
+    if (displayName && displayName !== user.displayName) {
+      const updateUser = { ...user, displayName: displayName };
+      localStorage.setItem('user', JSON.stringify(updateUser));
+      setUser(updateUser);
+    }
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     wsServiceRef.current = new WebsocketService(
-      `${protocol}://${env?.apiDomain}/ws/squad-connect/${room}/${userIdRef.current}/`
+      `${protocol}://${env?.apiDomain}/ws/squad-connect/${room}/${user.id}/?displayName=${displayName}`
     );
   }
 
@@ -82,7 +86,7 @@ export function SquadRoom() {
       getOptimizedStream();
     }
 
-    useRoomStore.setState({ userId: userIdRef.current });
+    useRoomStore.setState({ userId: user.id });
     useRoomStore.setState({ wsService: wsServiceRef.current });
   }, []);
 
@@ -166,7 +170,7 @@ export function SquadRoom() {
     wsService.send({
       sender: userId,
       type: 'join',
-      payload: { type: 'join', payload: { userId: userIdRef.current } },
+      payload: { type: 'join', payload: { userId: user.id } },
     });
     useRoomStore.setState({ roomStatus: 'connected' });
   }, [wsService, userId]);
@@ -176,7 +180,7 @@ export function SquadRoom() {
     wsService.send({
       sender: userId,
       type: 'leave',
-      payload: { type: 'leave', payload: { userId: userIdRef.current } },
+      payload: { type: 'leave', payload: { userId: user.id } },
     });
     useRoomStore.setState({
       roomStatus: 'ready',

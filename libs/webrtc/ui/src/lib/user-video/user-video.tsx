@@ -3,6 +3,7 @@ import styles from './user-video.module.scss';
 import { useEffect, useRef, useState } from 'react';
 import { IconGhost2 } from '@tabler/icons-react';
 import React from 'react';
+import { useAppStore } from '@JC/shared/store';
 
 function UserVideo({
   mediaStream,
@@ -19,6 +20,9 @@ function UserVideo({
   const [aspectRatio, setAspectRatio] = useState<number>(
     window.innerWidth / window.innerHeight
   );
+
+  const user = useAppStore((state) => state.user);
+
   useEffect(() => {
     if (videoRef.current && mediaStream) {
       videoRef.current.srcObject = mediaStream;
@@ -83,7 +87,7 @@ function UserVideo({
           fontWeight: 'bold',
         }}
       >
-        User: {userId}
+        User: {isSelf ? user.displayName : userId}
       </Text>
       {!isCameraOn && (
         <div
@@ -105,7 +109,7 @@ function UserVideo({
             <Avatar size={'xl'} name="User" variant="filled" color="indigo">
               <IconGhost2></IconGhost2>
             </Avatar>
-            User: {userId}
+            User: {isSelf ? user.displayName : userId}
           </Flex>
         </div>
       )}

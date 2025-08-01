@@ -5,9 +5,13 @@ export interface Room {
   participants: Participant[];
 }
 
-export interface Participant {
-  id: string;
+export interface User {
+  userId: string;
   name: string;
+}
+
+export interface Participant {
+  user: User;
   joinedAt: Date;
   leftAt: Date | null;
 }
