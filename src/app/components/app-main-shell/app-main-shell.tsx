@@ -12,16 +12,31 @@ import SideNav from '../side-nav/side-nav';
 import AppRouting from '../app-routing/app-routing';
 import classes from './app-main-shell.module.scss';
 import { useEffect } from 'react';
+import { useAppStore } from '@JC/shared/store';
 
 export function AppMainShell() {
   const [mobileOpened, { toggle: toggleMobile, close: closeNav }] =
     useDisclosure();
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
 
+  const setUser = useAppStore((state) => state.setUser);
+
   // default to dark
   useEffect(() => {
     setColorScheme('dark');
   }, []);
+
+  useEffect(() => {
+    const userJson = localStorage.getItem('user');
+    if (userJson) {
+      setUser(JSON.parse(userJson));
+    } else {
+      const id = Math.random().toString(36).substring(2, 9);
+      const user = { id: id, displayName: id };
+      localStorage.setItem('user', JSON.stringify(user));
+      setUser(user);
+    }
+  }, [setUser]);
 
   // -> colorScheme is 'auto' | 'light' | 'dark'
   const { setColorScheme } = useMantineColorScheme();
