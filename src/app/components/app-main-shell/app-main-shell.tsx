@@ -1,8 +1,11 @@
 import {
   AppShell,
   Burger,
+  Center,
   Code,
+  Flex,
   Group,
+  Loader,
   Switch,
   useComputedColorScheme,
   useMantineColorScheme,
@@ -11,15 +14,17 @@ import { useDisclosure } from '@mantine/hooks';
 import SideNav from '../side-nav/side-nav';
 import AppRouting from '../app-routing/app-routing';
 import classes from './app-main-shell.module.scss';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppStore } from '@JC/shared/store';
 
 export function AppMainShell() {
   const [mobileOpened, { toggle: toggleMobile, close: closeNav }] =
     useDisclosure();
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   const setUser = useAppStore((state) => state.setUser);
+  const user = useAppStore((state) => state.user);
 
   // default to dark
   useEffect(() => {
@@ -37,6 +42,12 @@ export function AppMainShell() {
       setUser(user);
     }
   }, [setUser]);
+
+  useEffect(() => {
+    if (user.id !== 'unknown') {
+      setIsLoading(false);
+    }
+  }, [user]);
 
   // -> colorScheme is 'auto' | 'light' | 'dark'
   const { setColorScheme } = useMantineColorScheme();
@@ -88,8 +99,15 @@ export function AppMainShell() {
       <AppShell.Navbar p="md">
         <SideNav closeNav={closeNav} />
       </AppShell.Navbar>
+
       <AppShell.Main className={classes.main}>
-        <AppRouting />
+        {isLoading ? (
+          <Center h="90vh">
+            <Loader size="100" />
+          </Center>
+        ) : (
+          <AppRouting />
+        )}
       </AppShell.Main>
     </AppShell>
   );
