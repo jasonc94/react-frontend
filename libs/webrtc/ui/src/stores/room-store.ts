@@ -73,7 +73,7 @@ export const useRoomStore = create<RoomState & RoomStateActions>((set, get) => {
     };
 
     pc.onicecandidate = (event) => {
-      // console.log('New ICE candidateReceived');
+      console.log('ICE Candidate:', event.candidate);
       if (event.candidate) {
         wsService.send({
           sender: userId,
