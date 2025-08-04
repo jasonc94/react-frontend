@@ -8,6 +8,7 @@ type RoomState = {
   wsService: WebsocketService | null;
   peerConnections: { [peerId: string]: RTCPeerConnection };
   peerStreams: { [peerId: string]: MediaStream };
+  iceServers: RTCIceServer[];
 };
 
 type RoomStateActions = {
@@ -33,11 +34,12 @@ const initialRoomState: RoomState = {
   wsService: null,
   peerConnections: {},
   peerStreams: {},
+  iceServers: [],
 };
 
 export const useRoomStore = create<RoomState & RoomStateActions>((set, get) => {
   const createPeerConnection = (peerId: string) => {
-    const { userId, peerConnections, wsService } = get();
+    const { userId, peerConnections, wsService, iceServers } = get();
 
     if (userId === null) throw new Error('User ID is not initialized');
 
@@ -46,19 +48,24 @@ export const useRoomStore = create<RoomState & RoomStateActions>((set, get) => {
 
     if (peerConnections[peerId]) return peerConnections[peerId];
 
+    const servers =
+      iceServers.length > 0
+        ? iceServers
+        : [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun.l.google.com:5349' },
+            { urls: 'stun:stun1.l.google.com:3478' },
+            { urls: 'stun:stun1.l.google.com:5349' },
+            { urls: 'stun:stun2.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:5349' },
+            { urls: 'stun:stun3.l.google.com:3478' },
+            { urls: 'stun:stun3.l.google.com:5349' },
+            { urls: 'stun:stun4.l.google.com:19302' },
+            { urls: 'stun:stun4.l.google.com:5349' },
+          ];
+
     const pc = new RTCPeerConnection({
-      iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun.l.google.com:5349' },
-        { urls: 'stun:stun1.l.google.com:3478' },
-        { urls: 'stun:stun1.l.google.com:5349' },
-        { urls: 'stun:stun2.l.google.com:19302' },
-        { urls: 'stun:stun2.l.google.com:5349' },
-        { urls: 'stun:stun3.l.google.com:3478' },
-        { urls: 'stun:stun3.l.google.com:5349' },
-        { urls: 'stun:stun4.l.google.com:19302' },
-        { urls: 'stun:stun4.l.google.com:5349' },
-      ],
+      iceServers: servers,
     });
 
     addLocalStreamToPeer(pc);

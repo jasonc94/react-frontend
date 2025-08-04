@@ -7,6 +7,7 @@ import UserVideo from '../user-video/user-video';
 import RoomControls from '../room-controls/room-controls';
 import { EnvironmentContext } from '@JC/shared/context';
 import { useRoomStore } from '../../stores/room-store';
+import axios from 'axios';
 
 export function SquadRoom() {
   const { room } = useParams(); // Get the room parameter from the URL
@@ -18,6 +19,7 @@ export function SquadRoom() {
 
   const [websocketConnected, setWebsocketConnected] = useState(false);
 
+  const iceServers = useRoomStore((state) => state.iceServers);
   const userId = useRoomStore((state) => state.userId);
   const wsService = useRoomStore((state) => state.wsService);
   const peerStreams = useRoomStore((state) => state.peerStreams);
@@ -80,6 +82,16 @@ export function SquadRoom() {
     if (!localStream) {
       console.log('Init local stream');
       getOptimizedStream();
+    }
+
+    const getIceServers = async (iceServerApiUrl: string) => {
+      const response = await axios.get(iceServerApiUrl);
+      const iceServers = response.data;
+      useRoomStore.setState({ iceServers: iceServers });
+    };
+
+    if (env?.turnServerApiUrl && iceServers.length === 0) {
+      getIceServers(env?.turnServerApiUrl);
     }
 
     useRoomStore.setState({ userId: userIdRef.current });
